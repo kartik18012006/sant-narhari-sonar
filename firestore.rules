@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: true only if the current user's document has isAdmin == true
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Users: read own or by admin; create/update own; admin can update any user (e.g. setUserAdmin)
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Payment gateway config: read by auth; write only via Console
+    match /payment/{document} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Payment records: create by auth; read own only
+    match /payments/{paymentId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Content collections: any auth user can create and read; only admins can update or delete
+    match /family_directory/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    match /matrimony/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    match /social_workers/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    match /advertisements/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    match /news/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+    match /events/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+
+    // Event RSVPs: read and create by auth; update/delete own only
+    match /event_rsvps/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Businesses: create and read by auth; update/delete by owner or admin
+    match /businesses/{docId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if request.auth != null
+        && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Feedback: create by auth; read and delete only by admin
+    match /feedback/{docId} {
+      allow create: if request.auth != null;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+  }
+}
