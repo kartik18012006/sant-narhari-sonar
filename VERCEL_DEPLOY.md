@@ -1,8 +1,26 @@
 # Deploy Sant Narhari Sonar Web App to Vercel
 
-Vercel does **not** have Flutter on its build servers, so running `flutter build web` on Vercel fails. This project uses **GitHub Actions** to build Flutter web and deploy the prebuilt output to Vercel.
+---
 
-**Important:** Deployment happens **only** via the GitHub Action (which has Flutter). Do **not** let Vercel run a build—it will fail with "flutter: command not found".
+## Fresh deploy (new Vercel project)
+
+If you deleted the old project and are importing this repo again:
+
+1. Go to [vercel.com](https://vercel.com) → **Add New…** → **Project**.
+2. **Import** the repo: `kartik18012006/sant-narhari-sonar` (connect GitHub if needed).
+3. **Build settings** (important):
+   - **Framework Preset:** leave as **Other** (or let Vercel auto-detect).
+   - **Build Command:** set to **`npm run build`** (do **not** use `flutter pub get && flutter build web`).
+   - **Output Directory:** set to **`build/web`**.
+4. Click **Deploy**.
+
+The repo includes `package.json` and `build.js` so `npm run build` creates a placeholder page and the deploy succeeds. To deploy the **full Flutter app**, add the three GitHub secrets and run the **Deploy to Vercel** workflow (see sections 2–4 below).
+
+---
+
+## How deployment works
+
+Vercel does **not** have Flutter on its build servers, so running `flutter build web` on Vercel fails. This repo uses **`npm run build`** on Vercel (placeholder) and **GitHub Actions** to build and deploy the full Flutter app when you run the workflow.
 
 ---
 
