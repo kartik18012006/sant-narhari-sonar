@@ -18,11 +18,14 @@ Then only the GitHub Action will deploy.
 3. Under **Connected Git Repository**, click **Disconnect** (or **Disconnect Repository**). Confirm.
 4. From now on, **no push will trigger a Vercel build.** Deploys happen only when you run the **Deploy to Vercel** workflow (see step 4 below).
 
-**Option B – Keep Git connected but remove the build command**
+**Option B – Keep Git connected; use the repo’s no-op build**
+
+The repo has a `package.json` build that creates a tiny placeholder so Vercel doesn’t run Flutter.
 
 1. **Settings** → **Build & Development Settings**.
-2. Under **Override**, find **Build Command**.
-3. Clear the value (remove `flutter pub get && flutter build web`) and save.
+2. Under **Override**, set **Build Command** to: `npm run build`
+3. Set **Output Directory** to: `build/web` (if not already).
+4. Save. The next deploy will run `npm run build` (no Flutter) and succeed. Run the **Deploy to Vercel** workflow in GitHub Actions to deploy the full Flutter app.
 
 Then add the three GitHub secrets (step 3 below) and run the **Deploy to Vercel** workflow from the repo **Actions** tab. That workflow builds Flutter and deploys the app to Vercel.
 
