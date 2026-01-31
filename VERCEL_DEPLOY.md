@@ -6,16 +6,25 @@ Vercel does **not** have Flutter on its build servers, so running `flutter build
 
 ---
 
-## 0. Fix "flutter: command not found" (stop Vercel from building)
+## 0. Fix "flutter: command not found" (do this in the Vercel dashboard)
 
-If you already imported the repo in Vercel and see **Deployment failed** / **flutter: command not found**, turn off Vercel’s build so only the GitHub Action deploys:
+Vercel is still running **Build Command: `flutter pub get && flutter build web`** (set when you imported the repo). Vercel’s servers don’t have Flutter, so that build always fails. You have to change this **in the Vercel dashboard**; the repo can’t override it.
 
-1. Open your project on [Vercel](https://vercel.com) → **Settings**.
-2. Go to **Git** (or **Build & Development Settings**).
-3. **Either:**
-   - **Disable automatic deployments:** Under **Git**, turn off "Automatically deploy when new commits are pushed" (or disconnect the repo), **or**
-   - **Override build so it doesn’t run Flutter:** Under **Build & Development Settings** → **Override** → set **Build Command** to empty (clear the box) and save. That way Vercel won’t run `flutter` and fail. (Deploys from Git will then be empty until you use the Action; the Action is what actually deploys the built app.)
-4. Add the three GitHub secrets (step 3 below) and run the **Deploy to Vercel** workflow from the repo **Actions** tab. That workflow builds Flutter and deploys the app to Vercel.
+**Option A – Disconnect Git (recommended)**  
+Then only the GitHub Action will deploy.
+
+1. [Vercel](https://vercel.com) → open project **sant-narhari-sonar** → **Settings**.
+2. In the left sidebar, click **Git**.
+3. Under **Connected Git Repository**, click **Disconnect** (or **Disconnect Repository**). Confirm.
+4. From now on, **no push will trigger a Vercel build.** Deploys happen only when you run the **Deploy to Vercel** workflow (see step 4 below).
+
+**Option B – Keep Git connected but remove the build command**
+
+1. **Settings** → **Build & Development Settings**.
+2. Under **Override**, find **Build Command**.
+3. Clear the value (remove `flutter pub get && flutter build web`) and save.
+
+Then add the three GitHub secrets (step 3 below) and run the **Deploy to Vercel** workflow from the repo **Actions** tab. That workflow builds Flutter and deploys the app to Vercel.
 
 ---
 
