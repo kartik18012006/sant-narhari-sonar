@@ -1,6 +1,8 @@
 # Deploy Sant Narhari Sonar Web App to Vercel
 
-Vercel does not run Flutter builds on its servers, so this project uses **GitHub Actions** to build Flutter web and deploy the output to Vercel with `--prebuilt`.
+Vercel does **not** have Flutter on its build servers, so running `flutter build web` on Vercel fails. This project uses **GitHub Actions** to build Flutter web and deploy the prebuilt output to Vercel.
+
+**Important:** `vercel.json` has `"github": { "enabled": false }` so Vercel does **not** try to build on push (which would fail). Deployment happens **only** when the GitHub Action runs (after you add the secrets below).
 
 ---
 
