@@ -2,7 +2,20 @@
 
 Vercel does **not** have Flutter on its build servers, so running `flutter build web` on Vercel fails. This project uses **GitHub Actions** to build Flutter web and deploy the prebuilt output to Vercel.
 
-**Important:** `vercel.json` has `"github": { "enabled": false }` so Vercel does **not** try to build on push (which would fail). Deployment happens **only** when the GitHub Action runs (after you add the secrets below).
+**Important:** Deployment happens **only** via the GitHub Action (which has Flutter). Do **not** let Vercel run a build—it will fail with "flutter: command not found".
+
+---
+
+## 0. Fix "flutter: command not found" (stop Vercel from building)
+
+If you already imported the repo in Vercel and see **Deployment failed** / **flutter: command not found**, turn off Vercel’s build so only the GitHub Action deploys:
+
+1. Open your project on [Vercel](https://vercel.com) → **Settings**.
+2. Go to **Git** (or **Build & Development Settings**).
+3. **Either:**
+   - **Disable automatic deployments:** Under **Git**, turn off "Automatically deploy when new commits are pushed" (or disconnect the repo), **or**
+   - **Override build so it doesn’t run Flutter:** Under **Build & Development Settings** → **Override** → set **Build Command** to empty (clear the box) and save. That way Vercel won’t run `flutter` and fail. (Deploys from Git will then be empty until you use the Action; the Action is what actually deploys the built app.)
+4. Add the three GitHub secrets (step 3 below) and run the **Deploy to Vercel** workflow from the repo **Actions** tab. That workflow builds Flutter and deploys the app to Vercel.
 
 ---
 
