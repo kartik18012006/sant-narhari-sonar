@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../app_theme.dart';
 import '../payment_config.dart';
 import '../services/firebase_auth_service.dart';
-import '../services/firebase_storage_service.dart';
 import '../services/firestore_service.dart';
+import '../services/image_picker_service.dart';
 import 'payment_screen.dart';
 
 /// Event Registration Form — comprehensive form matching screenshots exactly.
@@ -97,50 +96,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<String?> _uploadBanner() async {
-    final user = FirebaseAuthService.instance.currentUser;
-    if (user == null) return null;
-    final source = await showModalBottomSheet<ImageSource>(
+    return await ImagePickerService.instance.pickAndUploadImage(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-            ),
-          ],
-        ),
-      ),
+      storagePath: 'events/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}/banner',
+      maxWidth: 1920,
+      maxHeight: 1080,
+      successMessage: 'Banner uploaded successfully.',
+      errorMessage: 'Upload failed. Please try again.',
     );
-    if (source == null || !mounted) return null;
-    try {
-      final picker = ImagePicker();
-      final xFile = await picker.pickImage(source: source, maxWidth: 1920, maxHeight: 1080, imageQuality: 85);
-      if (xFile == null || !mounted) return null;
-      final bytes = await xFile.readAsBytes();
-      if (bytes.length > FirebaseStorageService.maxBytes) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image must be under 1MB. Please choose a smaller image.')),
-          );
-        }
-        return null;
-      }
-      final path = FirebaseStorageService.instance.uniquePath('events/${user.uid}/banner', extension: 'jpg');
-      return await FirebaseStorageService.instance.uploadImage(bytes: bytes, path: path);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-      return null;
-    }
   }
 
   Future<bool> _checkEventPaymentValidity() async {

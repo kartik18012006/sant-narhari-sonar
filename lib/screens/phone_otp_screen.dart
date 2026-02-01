@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -383,29 +382,43 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   }
 }
   String _friendlyPhoneError(String message) {
+    // Handle authorization errors (most critical)
+    if (message.contains('not authorized') || 
+        message.contains('unauthorized') ||
+        message.contains('package name') ||
+        message.contains('app credential') ||
+        message.contains('app-not-authorized')) {
+      return 'Firebase Authentication authorization error.\n\nPlease verify:\n• Package name matches Firebase Console\n• SHA-1/SHA-256 fingerprints are added\n• google-services.json is up to date\n\nContact support if the issue persists.';
+    }
+    
     // Handle reCAPTCHA errors (especially for web)
     if (message.contains('recaptcha') || 
         message.contains('RECAPTCHA') ||
         message.contains('identitytoolkit') ||
-        message.contains('reCAPTCHA')) {
-      return 'reCAPTCHA verification failed. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) and try again.';
+        message.contains('reCAPTCHA') ||
+        message.contains('missing-recaptcha')) {
+      return 'reCAPTCHA verification failed.\n\nFor web: Ensure reCAPTCHA Enterprise is enabled in Firebase Console:\nAuthentication → Settings → reCAPTCHA Enterprise\n\nThen try again.';
     }
+    
+    // Handle other common errors
     if (message.contains('invalid-phone-number') || message.contains('Invalid')) {
-      return 'Invalid phone number. Use a valid 10-digit Indian mobile number.';
+      return 'Invalid phone number. Use a valid 10-digit Indian mobile number (e.g. 9876543210).';
     }
     if (message.contains('too-many-requests')) {
-      return 'Too many attempts. Please try again later.';
+      return 'Too many attempts. Please wait a few minutes before trying again.';
     }
     if (message.contains('quota') || message.contains('exceeded')) {
-      return 'SMS quota exceeded. Please try again later.';
+      return 'SMS quota exceeded. Please try again later or contact support.';
     }
     if (message.contains('play_integrity') || message.contains('safety')) {
       return 'Device verification issue. Ensure app is from Play Store or use test numbers in Firebase Console.';
     }
-    if (message.contains('missing-recaptcha-token') || message.contains('missing-recaptcha-response')) {
-      return 'reCAPTCHA verification required. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console.';
+    if (message.contains('Firebase not initialized')) {
+      return 'Firebase initialization error. Please restart the app.';
     }
-    return message.length > 100 ? message.substring(0, 100) + '...' : message;
+    
+    // Return message (truncate if too long)
+    return message.length > 150 ? message.substring(0, 150) + '...' : message;
   }
 
   Future<void> _onResendOtp() async {
@@ -471,21 +484,41 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
           const SnackBar(content: Text('Verification failed. Please try again or request a new code.')),
         );
       }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        String message = 'OTP verification failed.';
+        switch (e.code) {
+          case 'invalid-verification-code':
+            message = 'Invalid OTP code. Please check the code and try again.';
+            break;
+          case 'session-expired':
+          case 'code-expired':
+            message = 'OTP code has expired. Please tap Resend to get a new code.';
+            break;
+          case 'invalid-verification-id':
+            message = 'Invalid verification session. Please request a new OTP.';
+            break;
+          default:
+            message = e.message ?? e.code;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        String message = 'Invalid or expired code. Please try again or tap Resend for a new code.';
-        if (e is FirebaseAuthException) {
-          if (e.code == 'invalid-verification-code') {
-            message = 'Invalid OTP. Please check the code and try again.';
-          } else if (e.code == 'session-expired') {
-            message = 'Code expired. Please tap Resend to get a new code.';
-          } else {
-            message = e.message ?? e.code;
-          }
-        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
+          SnackBar(
+            content: Text('OTP verification failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }

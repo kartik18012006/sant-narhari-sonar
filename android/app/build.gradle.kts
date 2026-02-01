@@ -77,8 +77,11 @@ flutter {
 }
 
 dependencies {
-    // Firebase BOM and Auth (for MainActivity app verification disable in debug)
+    // Firebase BOM - manages Firebase library versions
+    // Using BOM 33.7.0 (compatible with Flutter firebase_auth 5.4.0)
+    // BOM 34.0.0+ removed -ktx suffix, so we use 33.7.0 for compatibility
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    // Firebase Auth KTX - required for MainActivity.kt to use FirebaseAuth.getInstance()
     implementation("com.google.firebase:firebase-auth-ktx")
     // Google Play Services - Required for Firebase
     implementation("com.google.android.gms:play-services-base:18.2.0")

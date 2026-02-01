@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../app_theme.dart';
 import '../services/firebase_auth_service.dart';
-import '../services/firebase_storage_service.dart';
 import '../services/firestore_service.dart';
+import '../services/image_picker_service.dart';
 
 /// List News form — after payment. Matches APK exactly: title, description, gold styling.
 class CreateNewsScreen extends StatefulWidget {
@@ -218,63 +217,19 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
   }
 
   Future<void> _uploadImage() async {
-    final user = FirebaseAuthService.instance.currentUser;
-    if (user == null) return;
-    final source = await showModalBottomSheet<ImageSource>(
+    setState(() => _uploadingImage = true);
+    final url = await ImagePickerService.instance.pickAndUploadImage(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-            ),
-          ],
-        ),
-      ),
+      storagePath: 'news/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}',
+      maxWidth: 1920,
+      maxHeight: 1080,
+      successMessage: 'Image uploaded successfully.',
     );
-    if (source == null || !mounted) return;
-    try {
-      final picker = ImagePicker();
-      final xFile = await picker.pickImage(source: source, maxWidth: 1920, maxHeight: 1080, imageQuality: 85);
-      if (xFile == null || !mounted) return;
-      final bytes = await xFile.readAsBytes();
-      if (bytes.length > FirebaseStorageService.maxBytes) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image must be under 1MB. Please choose a smaller image.')),
-          );
-        }
-        return;
-      }
-      setState(() => _uploadingImage = true);
-      final path = FirebaseStorageService.instance.uniquePath('news/${user.uid}', extension: 'jpg');
-      final url = await FirebaseStorageService.instance.uploadImage(bytes: bytes, path: path);
-      if (!mounted) return;
-      setState(() {
-        _uploadingImage = false;
-        if (url != null) {
-          _imageUrl = url;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image uploaded successfully.'), backgroundColor: Colors.green),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Upload failed. Please try again.')));
-        }
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() => _uploadingImage = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    }
+    if (!mounted) return;
+    setState(() {
+      _uploadingImage = false;
+      if (url != null) _imageUrl = url;
+    });
   }
 
   Widget _imagePlaceholder() {

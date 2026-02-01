@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -14,15 +14,20 @@ import 'services/language_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase with proper error handling
   try {
     if (kIsWeb) {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
     } else {
       await Firebase.initializeApp();
     }
-  } catch (_) {
-    // Firebase not configured (e.g. missing google-services.json / web config) — app still runs
+  } catch (e) {
+    // Log Firebase initialization errors for debugging
+    debugPrint('Firebase initialization error: $e');
+    // Continue anyway - Firebase might still work if config is correct
   }
+  
   // Load saved language (English / Marathi) from SharedPreferences
   await LanguageService.instance.loadSavedLanguage();
   runApp(const SantNarhariSonarApp());
@@ -105,7 +110,7 @@ class _SplashScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/main logo .png',
+                'assets/app logo.png',
                 width: 220,
                 height: 220,
                 fit: BoxFit.contain,
