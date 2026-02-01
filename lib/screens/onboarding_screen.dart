@@ -51,20 +51,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               // Main content: single main logo on first screen
               Expanded(
                 child: Center(
                   child: _AssetImage(
                     'assets/main logo .png',
-                    width: 220,
-                    height: 220,
+                    width: 340,
+                    height: 340,
                     fit: BoxFit.contain,
                     fallbackPath: 'assets/app logo.png',
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               // Create Your Profile — primary CTA (gold)
               SizedBox(
                 width: double.infinity,

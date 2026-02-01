@@ -25,6 +25,8 @@ class FirebaseAuthService {
     void Function(User user)? onVerificationCompleted,
   }) async {
     try {
+      // Firebase handles reCAPTCHA automatically on web
+      // For web, reCAPTCHA will be shown automatically by Firebase
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
@@ -37,7 +39,12 @@ class FirebaseAuthService {
           }
         },
         verificationFailed: (FirebaseAuthException e) {
-          onError(e.message ?? e.code);
+          // Handle reCAPTCHA errors gracefully
+          String errorMessage = e.message ?? e.code;
+          if (e.code == 'missing-recaptcha-token' || e.code.contains('recaptcha')) {
+            errorMessage = 'reCAPTCHA verification required. Please enable reCAPTCHA in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) or try again.';
+          }
+          onError(errorMessage);
         },
         codeSent: (String verificationId, int? resendToken) {
           onCodeSent(verificationId);
@@ -45,7 +52,11 @@ class FirebaseAuthService {
         codeAutoRetrievalTimeout: (_) {},
       );
     } catch (e) {
-      onError(e.toString());
+      String errorMessage = e.toString();
+      if (errorMessage.contains('recaptcha') || errorMessage.contains('RECAPTCHA')) {
+        errorMessage = 'reCAPTCHA verification required. Please enable reCAPTCHA Enterprise in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) or contact support.';
+      }
+      onError(errorMessage);
     }
   }
 
