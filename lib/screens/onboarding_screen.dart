@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _AppIcon(assetPath: 'assets/main logo .png', color: AppTheme.gold),
+                  _AppIcon(assetPath: 'assets/app logo.png', color: AppTheme.gold),
                   TextButton(
                     onPressed: _onSkip,
                     child: const Text(
@@ -56,11 +56,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Expanded(
                 child: Center(
                   child: _AssetImage(
-                    'assets/app logo.png',
+                    'assets/main logo .png',
                     width: 220,
                     height: 220,
                     fit: BoxFit.contain,
-                    fallbackPath: 'assets/main logo .png',
+                    fallbackPath: 'assets/app logo.png',
                   ),
                 ),
               ),

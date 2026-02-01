@@ -4,7 +4,7 @@ import '../app_theme.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/firestore_service.dart';
 import '../services/language_service.dart';
-import 'admin/admin_login_screen.dart';
+import 'admin/admin_password_login_screen.dart';
 import 'family_directory_registration_screen.dart';
 import 'matrimony_registration_screen.dart';
 import 'business_registration_screen.dart';
@@ -21,7 +21,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final LanguageService _lang = LanguageService.instance;
-  bool _isAdmin = false;
   bool _loadingRegistrations = true;
   bool _hasFamilyDirectory = false;
   bool _hasMatrimony = false;
@@ -32,22 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAdmin();
     _loadRegistrations();
-  }
-
-  Future<void> _loadAdmin() async {
-    final user = FirebaseAuthService.instance.currentUser;
-    if (user == null) {
-      if (mounted) setState(() => _isAdmin = false);
-      return;
-    }
-    try {
-      final isAdmin = await FirestoreService.instance.isAdmin(user.uid);
-      if (mounted) setState(() => _isAdmin = isAdmin);
-    } catch (_) {
-      if (mounted) setState(() => _isAdmin = false);
-    }
   }
 
   Future<void> _loadRegistrations() async {
@@ -104,19 +88,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
-              if (_isAdmin) ...[
-                _SettingsTile(
-                  icon: Icons.admin_panel_settings,
-                  title: _lang.pick('Admin Panel', 'व्यवस्थापक पॅनेल'),
-                  subtitle: _lang.pick('Manage users, content & feedback', 'वापरकर्ते, सामग्री आणि अभिप्राय व्यवस्थापित करा'),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AdminLoginScreen()),
-                  ).then((_) {
-                    if (mounted) _loadAdmin();
-                  }),
+              _SettingsTile(
+                icon: Icons.admin_panel_settings,
+                title: _lang.pick('Admin Panel', 'व्यवस्थापक पॅनेल'),
+                subtitle: _lang.pick('Approve registrations after payment', 'पेमेंट नंतर नोंदण्या मंजूर करा'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminPasswordLoginScreen()),
                 ),
-                const SizedBox(height: 12),
-              ],
+              ),
+              const SizedBox(height: 12),
               // Your Registrations Section
               Text(
                 _lang.pick('Your registrations', 'तुमच्या नोंदण्या'),

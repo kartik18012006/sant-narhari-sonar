@@ -139,7 +139,7 @@ class RulesScreen extends StatelessWidget {
 
   Widget _buildAppIcon() {
     return Image.asset(
-      'assets/main logo .png',
+      'assets/app logo.png',
       width: 56,
       height: 56,
       fit: BoxFit.contain,

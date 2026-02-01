@@ -57,6 +57,15 @@
       ]
     },
     {
+      "collectionGroup": "matrimony",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "social_workers",
       "queryScope": "COLLECTION",
       "fields": [

@@ -289,7 +289,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
   Widget _upcomingEventsSection(BuildContext context) {
     final userId = FirebaseAuthService.instance.currentUser?.uid ?? '';
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: FirestoreService.instance.streamEvents(limit: 10),
+      stream: FirestoreService.instance.streamEventsApproved(limit: 10),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Padding(
