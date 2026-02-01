@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../app_theme.dart';
+import 'package:sant_narhari_sonar/app_theme.dart';
 
 /// Goals, Objectives, Rules and Marathi section for About Us tab.
 class AboutTabGoalsContent extends StatelessWidget {

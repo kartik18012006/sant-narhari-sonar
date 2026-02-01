@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../app_theme.dart';
-import '../services/language_service.dart';
-import 'about_tab_goals_content.dart';
+import 'package:sant_narhari_sonar/app_theme.dart';
+import 'package:sant_narhari_sonar/screens/about_tab_goals_content.dart';
+import 'package:sant_narhari_sonar/services/language_service.dart';
 
 /// About Us tab. Content to be added step by step.
 class AboutTabScreen extends StatelessWidget {
@@ -37,6 +36,30 @@ class AboutTabScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // About Us intro
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    lang.pick(
+                      'Welcome to Sant Narhari Sonar — the app for the unification of the entire Sonar community. Below you will find our leaders, goals, objectives, and registration rules in English and Marathi.',
+                      'संत नरहरी सोनार ऐपमध्ये आपले स्वागत आहे — संपूर्ण सोनार समाज एकत्रीकरणासाठी. खाली आमचे नेते, ध्येय, उद्दिष्टे आणि नोंदणी नियम इंग्रजी आणि मराठीत आहेत.',
+                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade800, height: 1.5),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 // Leader image – full width, constrained height, fit perfectly
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -185,6 +208,16 @@ class AboutTabScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 28),
+                // Goals, Objectives & Rules (English + Marathi)
+                Text(
+                  lang.pick('Goals, Objectives & Rules', 'ध्येय, उद्दिष्टे आणि नियम'),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 const AboutTabGoalsContent(),
               ],
             ),

@@ -334,63 +334,54 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   }
 
   Future<void> _onSendOtp() async {
-    final number = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
-    if (number.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(number)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 10-digit Indian mobile number (e.g. 9876543210)')),
-      );
-      return;
-    }
-    setState(() => _loading = true);
-    try {
-      await FirebaseAuthService.instance.sendPhoneOtp(
-        phoneNumber: '+91$number',
-        onCodeSent: (verificationId) {
-          if (mounted) {
-            setState(() {
-              _verificationId = verificationId;
-              _otpSent = true;
-              _loading = false;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('OTP sent. Check your SMS.'), backgroundColor: Colors.green),
-            );
-          }
-        },
-        onError: (message) {
-          if (mounted) {
-            setState(() => _loading = false);
-            final friendly = _friendlyPhoneError(message);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(friendly)),
-            );
-          }
-        },
-        onVerificationCompleted: (user) async {
-          if (!mounted) return;
-          await FirestoreService.instance.setUserProfile(
-            uid: user.uid,
-            phoneNumber: user.phoneNumber,
-            displayName: user.displayName ?? 'User',
-          );
-          if (!mounted) return;
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const MainShellScreen()),
-            (route) => false,
-          );
-        },
-      );
-      // Loading is cleared only by onCodeSent or onError; do not clear here
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_friendlyPhoneError(e.toString()))),
-        );
-      }
-    }
+  final number = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
+
+  if (number.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(number)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Please enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
+        ),
+      ),
+    );
+    return;
   }
 
+  setState(() => _loading = true);
+
+  try {
+    await FirebaseAuthService.instance.sendPhoneOtp(
+      phoneNumber: '+91$number',
+      onCodeSent: (verificationId) {
+        if (!mounted) return;
+        setState(() {
+          _verificationId = verificationId;
+          _otpSent = true;
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OTP sent. Check your SMS.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      },
+      onError: (message) {
+        if (!mounted) return;
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_friendlyPhoneError(message))),
+        );
+      },
+    );
+  } catch (e) {
+    if (!mounted) return;
+    setState(() => _loading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(_friendlyPhoneError(e.toString()))),
+    );
+  }
+}
   String _friendlyPhoneError(String message) {
     if (message.contains('invalid-phone-number') || message.contains('Invalid')) {
       return 'Invalid phone number. Use a valid 10-digit Indian mobile number.';
