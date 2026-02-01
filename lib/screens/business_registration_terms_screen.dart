@@ -1,40 +1,74 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
-import 'register_social_worker_screen.dart';
+import 'business_registration_screen.dart';
 
-/// Social Worker Terms & Conditions — must agree before registration form.
-class SocialWorkerTermsScreen extends StatefulWidget {
-  const SocialWorkerTermsScreen({super.key});
+/// Business Registration Terms & Conditions — must agree before registration form.
+class BusinessRegistrationTermsScreen extends StatefulWidget {
+  const BusinessRegistrationTermsScreen({super.key});
 
   @override
-  State<SocialWorkerTermsScreen> createState() => _SocialWorkerTermsScreenState();
+  State<BusinessRegistrationTermsScreen> createState() => _BusinessRegistrationTermsScreenState();
 }
 
-class _SocialWorkerTermsScreenState extends State<SocialWorkerTermsScreen> {
+class _BusinessRegistrationTermsScreenState extends State<BusinessRegistrationTermsScreen> {
   bool _agreed = false;
 
-  static const String _titleEn = 'Social Worker Terms & Conditions';
-  static const String _titleMr = 'सामाजिक कार्यकर्ता नियम व अटी';
+  static const String _titleEn = 'Business Registration Terms & Conditions';
+  static const String _titleMr = 'व्यवसाय नोंदणी नियम व अटी';
 
   static const String _bodyMr = r'''
-📝 नोंदणी (Registration)
-अनुभव: सोशल वर्करला किमान या कामाचा ३ ते ५ वर्षांचा अनुभव पाहिजे.
-सत्यता: वापरकर्त्याने दिलेली सर्व माहिती खरी, अचूक आणि अद्ययावत असावी. चुकीची माहिती दिल्यास खाते रद्द केले जाऊ शकते.
-आचारसंहिता: वापरकर्ताल्या आचारसंहिता लागू असताना कुठल्याही पक्षाच्या जाहिराती किंवा बातम्या टाकण्यास सक्त मनाई आहे.
-अयोग्य सामग्री: कोणत्याही प्रकारचा अपमानास्पद, धार्मिक, राजकीय किंवा अश्लील मजकूर टाकण्यास सक्त मनाई आहे.
-सामाजिक सलोखा: समाजात मतभेद निर्माण करणारे किंवा इतरांच्या भावना दुखावणारे पोस्ट टाळावेत.
-फसवणूक: कोणत्याही प्रकारची फसवणूक किंवा चुकीची माहिती प्रसारित करणे प्रतिबंधित आहे.
+👤 वापरकर्ता पात्रता
+Business यूजर हा सोनार समाज्यातील कुठल्याही एका पोटजातीचा असावा.
+नोंदणी करताना दिलेली माहिती खरी व अचूक असावी.
+खोटी, पुनरावृत्ती केलेली किंवा दिशाभूल करणारी प्रोफाइल कायमची बंद केली जाईल.
+टीप: दिलेली माहिती सत्यतेसाठी पडताळली केली जाईल.
+
+🛡️ माहिती गोपनीयता आणि सुरक्षितता
+सर्व वैयक्तिक माहिती सुरक्षितरीत्या साठवली जाईल आणि परवानगीशिवाय शेअर केली जाणार नाही.
+वापरकर्त्याची माहिती केवळ पडताळणी, संवाद, आणि व्यवसाय विश्लेषणासाठी वापरली जाईल.
+
+📈 व्यवसाय आचरण
+अॅपचा वापर बेकायदेशीर, फसवे किंवा अनैतिक कामासाठी करू नये.
+अॅपचा गैरवापर झाल्यास खाते बंद किंवा कायदेशीर कारवाई होऊ शकते.
+
+💳 देयके आणि व्यवहार
+अॅप विकासक/कंपनी वापरकर्त्यांमधील वादांसाठी जबाबदार राहणार नाही.
+
+🚪 खाते बंद करण्याच्या अटी
+नियमांचे उल्लंघन करणारे खाते कंपनी कोणतीही पूर्वसूचना न देता बंद करू शकते.
+वापरकर्ता कधीही खाते हटविण्याची विनंती करू शकतो.
+
+⚖️ कायदेशीर सूचना
+सर्व कायदेशीर वाद स्थानिक न्यायालयांच्या अधिकारात येतील.
+कंपनीला या अटी केव्हाही अद्ययावत करण्याचा अधिकार आहे.
 ''';
 
   static const String _bodyEn = r'''
-📝 Registration
-Experience: A social worker must have a minimum of 3 to 5 years of experience in this field.
-Accuracy: All information provided by the user must be true, accurate, and up-to-date. Providing incorrect information may lead to account termination.
-Code of Conduct: Users are strictly prohibited from posting advertisements or news related to any political party while the code of conduct is in effect.
-Inappropriate Content: Posting any defamatory, religious, political, or obscene content is strictly forbidden.
-Social Harmony: Avoid posts that create social discord or hurt the sentiments of others.
-Fraud: Spreading any form of fraud or misinformation is prohibited.
+👤 User Eligibility
+Business user must be from one of the sub-castes of the Sonar community.
+User must provide true and accurate information during registration.
+Fake, duplicate, or misleading profiles will be permanently blocked.
+Note: The provided information will be verified for authenticity.
+
+🛡️ Data Privacy & Security
+All personal data will be stored securely and will not be shared without consent.
+User data may be used for verification, communication, and business analytics only.
+
+📈 Business Conduct
+Users shall not use the app for illegal, fraudulent, or unethical purposes.
+Any misuse may result in account suspension or legal action.
+
+💳 Payment & Transactions
+App developer/company shall not be liable for disputes between users.
+
+🚪 Termination of Account
+The company reserves the right to suspend or delete any account violating rules.
+User can request account deletion anytime.
+
+⚖️ Legal & Disclaimer
+All legal disputes shall be subject to jurisdiction of local courts.
+The company reserves the right to update these Terms anytime.
 ''';
 
   @override
@@ -137,7 +171,7 @@ Fraud: Spreading any form of fraud or misinformation is prohibited.
                         Navigator.of(context).pop();
                         Navigator.of(context).push(
                           MaterialPageRoute<bool>(
-                            builder: (_) => const RegisterSocialWorkerScreen(),
+                            builder: (_) => const BusinessRegistrationScreen(),
                           ),
                         );
                       }

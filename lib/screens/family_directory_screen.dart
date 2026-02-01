@@ -4,6 +4,7 @@ import '../app_theme.dart';
 import '../payment_config.dart';
 import 'family_directory_list_screen.dart';
 import 'family_directory_registration_screen.dart';
+import 'family_directory_terms_screen.dart';
 import 'payment_screen.dart';
 
 /// Family Directory — pay ₹101 to access, then register family & search directory. Matches APK.
@@ -144,14 +145,10 @@ class FamilyDirectoryScreen extends StatelessWidget {
       ),
     ).then((paid) {
       if (paid == true && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment successful. You can now add family details.'),
-            backgroundColor: Colors.green,
-          ),
-        );
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const FamilyDirectoryRegistrationScreen()),
+          MaterialPageRoute<bool>(
+            builder: (_) => const FamilyDirectoryTermsScreen(),
+          ),
         );
       }
     });

@@ -128,57 +128,121 @@ class FirestoreService {
       _firestore.collection('businesses');
 
   /// Add business registration (after payment).
+  /// [photos] map with keys: ownerPhoto, businessLogo, outdoorPhoto, interiorPhoto1, interiorPhoto2, interiorPhoto3 (all URLs).
+  /// [workingHours] map with keys for each day (monday, tuesday, etc.) containing {enabled: bool, from: String, to: String}.
+  /// [documents] map with keys: ownersAadhaar, ownersPanCard, businessPan, gstCertificate, udyamCertificate, shopActLicense, iec, businessAddressProof, signature (all booleans).
   Future<void> addBusiness({
     required String userId,
     required String businessName,
-    String? description,
-    String? contact,
-    String? address,
-    String? subcaste,
-    String? place,
-    String? businessNature,
+    String? typeOfBusiness,
+    String? businessStructure,
+    String? dateOfEstablishment,
+    String? businessDescription,
+    String? businessAddress,
+    String? businessPincode,
+    String? businessCityVillage,
+    String? businessTaluka,
+    String? businessDistrict,
+    String? businessState,
+    String? businessEmail,
+    String? businessPhone,
+    String? website,
+    String? ownerName,
+    String? ownerSubcaste,
+    String? ownerDateOfBirth,
+    String? ownerGender,
+    String? ownerMobile,
+    String? ownerEmail,
+    String? ownerResidentialAddress,
+    Map<String, String>? photos,
+    Map<String, Map<String, dynamic>>? workingHours,
+    Map<String, String?>? documents,
     String? createdBy,
-    String? passport,
-    String? panCard,
   }) async {
     await _businesses.add({
       'userId': userId,
       'businessName': businessName,
-      'description': description,
-      'contact': contact,
-      'address': address,
-      'subcaste': subcaste,
-      'place': place,
-      'businessNature': businessNature,
+      'typeOfBusiness': typeOfBusiness,
+      'businessStructure': businessStructure,
+      'dateOfEstablishment': dateOfEstablishment,
+      'businessDescription': businessDescription,
+      'businessAddress': businessAddress,
+      'businessPincode': businessPincode,
+      'businessCityVillage': businessCityVillage,
+      'businessTaluka': businessTaluka,
+      'businessDistrict': businessDistrict,
+      'businessState': businessState,
+      'businessEmail': businessEmail,
+      'businessPhone': businessPhone,
+      'website': website,
+      'ownerName': ownerName,
+      'ownerSubcaste': ownerSubcaste,
+      'ownerDateOfBirth': ownerDateOfBirth,
+      'ownerGender': ownerGender,
+      'ownerMobile': ownerMobile,
+      'ownerEmail': ownerEmail,
+      'ownerResidentialAddress': ownerResidentialAddress,
+      'photos': photos ?? {},
+      'workingHours': workingHours ?? {},
+      'documents': documents ?? {},
       'createdBy': createdBy,
-      'passport': passport,
-      'panCard': panCard,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
   /// Add family directory entry (after payment).
-  /// Passport and panCard are optional.
+  /// [familyMembers] optional list of maps with keys: name, relation, age, contact (all strings).
+  /// [documents] map with keys: aadhaar, panCard (both String URLs for uploaded images, or null if not uploaded).
   Future<void> addFamilyDirectoryEntry({
     required String userId,
     required String name,
-    String? relation,
-    String? village,
-    String? contact,
+    String? gender,
+    String? bloodGroup,
+    String? diet,
+    String? subcaste,
+    String? dateOfBirth,
+    String? phone,
+    String? whatsappNumber,
+    String? email,
+    String? permanentAddress,
+    String? permanentPincode,
+    String? permanentVillageCity,
+    String? permanentTaluka,
+    String? permanentDistrict,
+    String? permanentState,
+    String? permanentCountry,
+    String? emergencyContactPerson,
+    String? emergencyContactNumber,
+    List<Map<String, String>>? familyMembers,
     String? createdBy,
-    String? passport,
-    String? panCard,
+    String? photoUrl,
+    Map<String, String?>? documents,
   }) async {
     await _familyDirectory.add({
       'userId': userId,
       'name': name,
-      'relation': relation,
-      'village': village,
-      'contact': contact,
+      'gender': gender,
+      'bloodGroup': bloodGroup,
+      'diet': diet,
+      'subcaste': subcaste,
+      'dateOfBirth': dateOfBirth,
+      'phone': phone,
+      'whatsappNumber': whatsappNumber,
+      'email': email,
+      'permanentAddress': permanentAddress,
+      'permanentPincode': permanentPincode,
+      'permanentVillageCity': permanentVillageCity,
+      'permanentTaluka': permanentTaluka,
+      'permanentDistrict': permanentDistrict,
+      'permanentState': permanentState,
+      'permanentCountry': permanentCountry,
+      'emergencyContactPerson': emergencyContactPerson,
+      'emergencyContactNumber': emergencyContactNumber,
+      'familyMembers': familyMembers ?? [],
       'createdBy': createdBy,
-      'passport': passport,
-      'panCard': panCard,
+      'photoUrl': photoUrl,
+      'documents': documents ?? {},
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -186,23 +250,59 @@ class FirestoreService {
 
   /// Add matrimony profile (groom or bride, after payment).
   /// [familyMembers] optional list of maps with keys: name, number, relation, age (all strings).
-  /// [photoUrl] optional profile photo URL from Firebase Storage. Passport and panCard are optional.
+  /// [photoUrl] optional profile photo URL from Firebase Storage (kept for backward compatibility).
+  /// [closeupPhotoUrl] optional close-up photo URL (circular).
+  /// [fullPhotoUrl] optional full photo URL (rectangular).
+  /// [halfPhotoUrl] optional half photo URL (rectangular).
+  /// Passport and panCard are optional.
+  /// [documents] map with keys: aadhaar, panCard, passport, educationCertificate (all String URLs for uploaded images, or null if not uploaded).
   Future<void> addMatrimonyProfile({
     required String userId,
     required String type,
     required String name,
     String? phone,
+    String? whatsappNumber,
     String? email,
+    String? dateOfBirth,
+    String? age,
+    String? birthTime,
+    String? birthPlace,
+    String? height,
+    String? weight,
+    String? complexion,
+    String? bloodGroup,
+    String? diet,
+    String? manglik,
+    String? nakshatra,
+    String? rashi,
+    String? gotra,
+    String? maritalStatus,
+    String? disability,
+    String? familyValues,
+    String? financialOutlook,
+    String? communicationStyle,
+    String? hobbiesInterests,
+    String? lifeGoals,
     String? education,
     String? occupation,
     String? subcaste,
-    String? maritalStatus,
-    String? city,
+    String? district,
+    String? state,
+    String? country,
+    String? expectedEducation,
+    String? expectedOccupation,
+    String? expectedHeight,
+    String? expectedFamilyValues,
+    String? expectedFinancialOutlook,
+    String? expectedCommunicationStyle,
+    String? otherExpectations,
     List<Map<String, String>>? familyMembers,
     String? createdBy,
     String? photoUrl,
-    String? passport,
-    String? panCard,
+    String? closeupPhotoUrl,
+    String? fullPhotoUrl,
+    String? halfPhotoUrl,
+    Map<String, String?>? documents,
   }) async {
     await _matrimony.add({
       'userId': userId,
@@ -210,56 +310,122 @@ class FirestoreService {
       'name': name,
       'status': 'pending',
       'phone': phone,
+      'whatsappNumber': whatsappNumber,
       'email': email,
+      'dateOfBirth': dateOfBirth,
+      'age': age,
+      'birthTime': birthTime,
+      'birthPlace': birthPlace,
+      'height': height,
+      'weight': weight,
+      'complexion': complexion,
+      'bloodGroup': bloodGroup,
+      'diet': diet,
+      'manglik': manglik,
+      'nakshatra': nakshatra,
+      'rashi': rashi,
+      'gotra': gotra,
+      'maritalStatus': maritalStatus,
+      'disability': disability,
+      'familyValues': familyValues,
+      'financialOutlook': financialOutlook,
+      'communicationStyle': communicationStyle,
+      'hobbiesInterests': hobbiesInterests,
+      'lifeGoals': lifeGoals,
       'education': education,
       'occupation': occupation,
       'subcaste': subcaste,
-      'maritalStatus': maritalStatus,
-      'city': city,
+      'district': district,
+      'state': state,
+      'country': country,
+      'expectedEducation': expectedEducation,
+      'expectedOccupation': expectedOccupation,
+      'expectedHeight': expectedHeight,
+      'expectedFamilyValues': expectedFamilyValues,
+      'expectedFinancialOutlook': expectedFinancialOutlook,
+      'expectedCommunicationStyle': expectedCommunicationStyle,
+      'otherExpectations': otherExpectations,
       'familyMembers': familyMembers ?? [],
       'createdBy': createdBy,
       'photoUrl': photoUrl,
-      'passport': passport,
-      'panCard': panCard,
+      'closeupPhotoUrl': closeupPhotoUrl,
+      'fullPhotoUrl': fullPhotoUrl,
+      'halfPhotoUrl': halfPhotoUrl,
+      'documents': documents ?? {},
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
   /// Add social worker application (after terms acceptance). Matches APK form fields.
   /// Passport and panCard are optional.
+  /// [documents] map with keys: aadhaar, panCard (both String URLs for uploaded images, or null if not uploaded).
   Future<void> addSocialWorker({
     required String userId,
     required String name,
     String? phone,
+    String? whatsappNumber,
     String? email,
     String? createdBy,
-    String? address,
+    String? gender,
+    String? bloodGroup,
+    String? diet,
     String? subcaste,
     String? dateOfBirth,
+    String? permanentAddress,
+    String? permanentPincode,
+    String? permanentVillageCity,
+    String? permanentTaluka,
+    String? permanentDistrict,
+    String? permanentState,
+    String? permanentCountry,
+    String? currentAddress,
+    String? currentPincode,
+    String? currentVillageCity,
+    String? currentTaluka,
+    String? currentDistrict,
+    String? currentState,
+    String? currentCountry,
+    String? socialWorkInfo,
     int? yearsOfExperience,
     String? specialization,
     String? organization,
     String? description,
     String? photoUrl,
-    String? passport,
-    String? panCard,
+    Map<String, String?>? documents,
   }) async {
     await _socialWorkers.add({
       'userId': userId,
       'name': name,
       'phone': phone,
+      'whatsappNumber': whatsappNumber,
       'email': email,
       'createdBy': createdBy,
-      'address': address,
+      'gender': gender,
+      'bloodGroup': bloodGroup,
+      'diet': diet,
       'subcaste': subcaste,
       'dateOfBirth': dateOfBirth,
+      'permanentAddress': permanentAddress,
+      'permanentPincode': permanentPincode,
+      'permanentVillageCity': permanentVillageCity,
+      'permanentTaluka': permanentTaluka,
+      'permanentDistrict': permanentDistrict,
+      'permanentState': permanentState,
+      'permanentCountry': permanentCountry,
+      'currentAddress': currentAddress,
+      'currentPincode': currentPincode,
+      'currentVillageCity': currentVillageCity,
+      'currentTaluka': currentTaluka,
+      'currentDistrict': currentDistrict,
+      'currentState': currentState,
+      'currentCountry': currentCountry,
+      'socialWorkInfo': socialWorkInfo,
       'yearsOfExperience': yearsOfExperience,
       'specialization': specialization,
       'organization': organization,
       'description': description,
       'photoUrl': photoUrl,
-      'passport': passport,
-      'panCard': panCard,
+      'documents': documents ?? {},
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -301,6 +467,7 @@ class FirestoreService {
 
   /// Record a payment (for backend tracking; gateway integration later).
   /// When featureId is login_yearly and status is success, subscription is set in PaymentScreen.
+  /// When featureId is events/advertisement/news and status is success, validUntil is set to 24 hours from now.
   Future<void> recordPayment({
     required String userId,
     required String featureId,
@@ -316,6 +483,35 @@ class FirestoreService {
       'transactionId': transactionId,
       'createdAt': FieldValue.serverTimestamp(),
     });
+    
+    // For 24-hour features (events, advertisement, news), set validUntil
+    if (status == 'success' && (featureId == 'events' || featureId == 'advertisement' || featureId == 'news')) {
+      final validUntil = DateTime.now().add(const Duration(hours: 24));
+      await _users.doc(userId).set({
+        '${featureId}_validUntil': Timestamp.fromDate(validUntil),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+  }
+
+  /// Check if user has valid payment for a feature (for 24-hour features, checks validUntil).
+  Future<bool> hasValidPaymentForFeature(String userId, String featureId) async {
+    if (featureId == 'events' || featureId == 'advertisement' || featureId == 'news') {
+      final data = await getUserProfile(userId);
+      final validUntil = data?['${featureId}_validUntil'];
+      if (validUntil == null) return false;
+      if (validUntil is Timestamp) return validUntil.toDate().isAfter(DateTime.now());
+      if (validUntil is DateTime) return validUntil.isAfter(DateTime.now());
+      return false;
+    }
+    // For other features, check if there's at least one successful payment
+    final payments = await _payments
+        .where('userId', isEqualTo: userId)
+        .where('featureId', isEqualTo: featureId)
+        .where('status', isEqualTo: 'success')
+        .limit(1)
+        .get();
+    return payments.docs.isNotEmpty;
   }
 
   // --- Advertisements (Featured on Home) ---
@@ -339,16 +535,64 @@ class FirestoreService {
         .map((snap) => snap.docs.map((d) => _docWithId(d)).toList());
   }
 
+  /// Add advertisement registration (after payment).
+  /// [photos] map with keys: ownerPhoto, businessLogo, outdoorPhoto, interiorPhoto1, interiorPhoto2, interiorPhoto3 (all URLs).
+  /// [workingHours] map with keys for each day (monday, tuesday, etc.) containing {enabled: bool, from: String, to: String}.
+  /// [documents] map with keys: ownersAadhaar, ownersPanCard, businessPan, gstCertificate, udyamCertificate, shopActLicense, iec, businessAddressProof, signature (all booleans).
   Future<void> addAdvertisement({
     required String userId,
-    required String title,
-    required String subtitle,
+    required String businessName,
+    String? typeOfBusiness,
+    String? businessStructure,
+    String? dateOfEstablishment,
+    String? businessDescription,
+    String? businessAddress,
+    String? businessPincode,
+    String? businessCityVillage,
+    String? businessTaluka,
+    String? businessDistrict,
+    String? businessState,
+    String? businessEmail,
+    String? businessPhone,
+    String? website,
+    String? ownerName,
+    String? ownerSubcaste,
+    String? ownerDateOfBirth,
+    String? ownerGender,
+    String? ownerMobile,
+    String? ownerEmail,
+    String? ownerResidentialAddress,
+    Map<String, String>? photos,
+    Map<String, Map<String, dynamic>>? workingHours,
+    Map<String, String?>? documents,
     String? createdBy,
   }) async {
     await _advertisements.add({
       'userId': userId,
-      'title': title,
-      'subtitle': subtitle,
+      'businessName': businessName,
+      'typeOfBusiness': typeOfBusiness,
+      'businessStructure': businessStructure,
+      'dateOfEstablishment': dateOfEstablishment,
+      'businessDescription': businessDescription,
+      'businessAddress': businessAddress,
+      'businessPincode': businessPincode,
+      'businessCityVillage': businessCityVillage,
+      'businessTaluka': businessTaluka,
+      'businessDistrict': businessDistrict,
+      'businessState': businessState,
+      'businessEmail': businessEmail,
+      'businessPhone': businessPhone,
+      'website': website,
+      'ownerName': ownerName,
+      'ownerSubcaste': ownerSubcaste,
+      'ownerDateOfBirth': ownerDateOfBirth,
+      'ownerGender': ownerGender,
+      'ownerMobile': ownerMobile,
+      'ownerEmail': ownerEmail,
+      'ownerResidentialAddress': ownerResidentialAddress,
+      'photos': photos ?? {},
+      'workingHours': workingHours ?? {},
+      'documents': documents ?? {},
       'createdBy': createdBy,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
@@ -387,12 +631,23 @@ class FirestoreService {
   }
 
   /// [eventType] 'free' or 'paid'. When 'paid', [ticketAmount] is the entry ticket in ₹.
+  /// Add event registration. Matches form fields exactly.
+  /// [bannerUrl] optional URL for event banner image.
+  /// [date] format: dd/mm/yyyy.
+  /// [time] format: HH:MM AM/PM.
+  /// [venueAddress] full venue address.
+  /// [contactNumber] should include country code prefix if provided.
   Future<void> addEvent({
     required String userId,
     required String title,
-    required String date,
-    required String location,
+    String? bannerUrl,
+    String? date,
+    String? time,
+    String? city,
+    String? venueAddress,
     String? description,
+    String? organizerName,
+    String? contactNumber,
     String? createdBy,
     String eventType = 'free',
     num? ticketAmount,
@@ -400,9 +655,15 @@ class FirestoreService {
     await _events.add({
       'userId': userId,
       'title': title,
+      'bannerUrl': bannerUrl,
       'date': date,
-      'location': location,
+      'time': time,
+      'city': city,
+      'venueAddress': venueAddress,
+      'location': venueAddress ?? city, // Keep for backward compatibility
       'description': description,
+      'organizerName': organizerName,
+      'contactNumber': contactNumber,
       'createdBy': createdBy,
       'eventType': eventType == 'paid' ? 'paid' : 'free',
       'ticketAmount': eventType == 'paid' && ticketAmount != null ? ticketAmount : null,
@@ -484,12 +745,14 @@ class FirestoreService {
     required String userId,
     required String title,
     required String description,
+    String? imageUrl,
     String? createdBy,
   }) async {
     await _news.add({
       'userId': userId,
       'title': title,
       'description': description,
+      'imageUrl': imageUrl,
       'createdBy': createdBy,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
@@ -642,6 +905,34 @@ class FirestoreService {
   Future<bool> hasUserRegisteredSocialWorker(String userId) async {
     final snap = await _socialWorkers.where('userId', isEqualTo: userId).limit(1).get();
     return snap.docs.isNotEmpty;
+  }
+
+  /// Get user's family directory registration (most recent).
+  Future<Map<String, dynamic>?> getUserFamilyDirectoryRegistration(String userId) async {
+    final snap = await _familyDirectory.where('userId', isEqualTo: userId).orderBy('createdAt', descending: true).limit(1).get();
+    if (snap.docs.isEmpty) return null;
+    return _docWithId(snap.docs.first);
+  }
+
+  /// Get user's matrimony registration (most recent, bride or groom).
+  Future<Map<String, dynamic>?> getUserMatrimonyRegistration(String userId) async {
+    final snap = await _matrimony.where('userId', isEqualTo: userId).orderBy('createdAt', descending: true).limit(1).get();
+    if (snap.docs.isEmpty) return null;
+    return _docWithId(snap.docs.first);
+  }
+
+  /// Get user's business registration (most recent).
+  Future<Map<String, dynamic>?> getUserBusinessRegistration(String userId) async {
+    final snap = await _businesses.where('userId', isEqualTo: userId).orderBy('createdAt', descending: true).limit(1).get();
+    if (snap.docs.isEmpty) return null;
+    return _docWithId(snap.docs.first);
+  }
+
+  /// Get user's social worker registration (most recent).
+  Future<Map<String, dynamic>?> getUserSocialWorkerRegistration(String userId) async {
+    final snap = await _socialWorkers.where('userId', isEqualTo: userId).orderBy('createdAt', descending: true).limit(1).get();
+    if (snap.docs.isEmpty) return null;
+    return _docWithId(snap.docs.first);
   }
 
   Future<void> deleteFamilyDirectoryEntry(String id) async {

@@ -15,6 +15,7 @@ class ViewAllEventsScreen extends StatefulWidget {
 class _ViewAllEventsScreenState extends State<ViewAllEventsScreen> {
   /// 'all' | 'free' | 'paid'
   String _filter = 'all';
+  final _searchController = TextEditingController();
 
   static bool _eventMatchesFilter(Map<String, dynamic> ev, String filter) {
     if (filter == 'all') return true;
@@ -33,6 +34,27 @@ class _ViewAllEventsScreenState extends State<ViewAllEventsScreen> {
       return 'Paid';
     }
     return 'Free';
+  }
+
+  static bool _eventMatchesSearch(Map<String, dynamic> ev, String query) {
+    if (query.isEmpty) return true;
+    final searchLower = query.toLowerCase();
+    final title = (ev['title'] as String? ?? '').toLowerCase();
+    final city = (ev['city'] as String? ?? '').toLowerCase();
+    final venue = (ev['venueAddress'] as String? ?? '').toLowerCase();
+    final organizer = (ev['organizerName'] as String? ?? '').toLowerCase();
+    final description = (ev['description'] as String? ?? '').toLowerCase();
+    return title.contains(searchLower) ||
+        city.contains(searchLower) ||
+        venue.contains(searchLower) ||
+        organizer.contains(searchLower) ||
+        description.contains(searchLower);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,6 +79,43 @@ class _ViewAllEventsScreenState extends State<ViewAllEventsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search events... / कार्यक्रम शोधा...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                          });
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppTheme.gold, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Row(
@@ -81,7 +140,10 @@ class _ViewAllEventsScreenState extends State<ViewAllEventsScreen> {
                   return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                 }
                 final list = snapshot.data ?? [];
-                final filtered = list.where((ev) => _eventMatchesFilter(ev, _filter)).toList();
+                final searchQuery = _searchController.text.trim();
+                final filtered = list
+                    .where((ev) => _eventMatchesFilter(ev, _filter) && _eventMatchesSearch(ev, searchQuery))
+                    .toList();
                 if (filtered.isEmpty) {
                   return Center(
                     child: Padding(

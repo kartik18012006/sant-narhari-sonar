@@ -352,6 +352,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                     title: displayList[i]['title'] as String? ?? 'News',
                     date: _formatNewsDate(displayList[i]['createdAt']),
                     description: displayList[i]['description'] as String? ?? '',
+                    imageUrl: displayList[i]['imageUrl'] as String?,
                     onTap: () {},
                   ),
                 ),
@@ -383,6 +384,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
     required String title,
     required String date,
     required String description,
+    String? imageUrl,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -403,49 +405,67 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppTheme.gold.withValues(alpha: 0.15),
+              if (imageUrl != null && imageUrl.isNotEmpty) ...[
+                ClipRRect(
                   borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
                 ),
-                child: Icon(Icons.campaign_outlined, color: AppTheme.gold, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                const SizedBox(height: 12),
+              ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppTheme.gold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      date,
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    child: Icon(Icons.campaign_outlined, color: AppTheme.gold, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          date,
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                        if (description.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            description,
+                            style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.4),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
                     ),
-                    if (description.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        description,
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.4),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade500),
+                ],
               ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade500),
             ],
           ),
         ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../app_theme.dart';
 import '../services/firebase_auth_service.dart';
+import '../services/firebase_storage_service.dart';
 import '../services/firestore_service.dart';
 
 /// List News form — after payment. Matches APK exactly: title, description, gold styling.
@@ -15,6 +17,8 @@ class CreateNewsScreen extends StatefulWidget {
 class _CreateNewsScreenState extends State<CreateNewsScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  String? _imageUrl;
+  bool _uploadingImage = false;
   bool _loading = false;
 
   @override
@@ -42,6 +46,7 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         userId: user.uid,
         title: title,
         description: _descriptionController.text.trim(),
+        imageUrl: _imageUrl,
         createdBy: profile?['displayName'] as String? ?? user.displayName ?? user.email ?? user.phoneNumber,
       );
       if (!mounted) return;
@@ -81,6 +86,63 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
             Text(
               'News automatically expires after 24 hours. Enter title and description.',
               style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+            ),
+            const SizedBox(height: 24),
+            
+            // News Image Upload
+            _label('News Image (Optional) / बातमीची प्रतिमा (ऐच्छिक)'),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _uploadingImage ? null : _uploadImage,
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.pink.shade50,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  border: Border.all(color: Colors.pink.shade200, width: 2, style: BorderStyle.solid),
+                ),
+                child: _uploadingImage
+                    ? const Center(
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : (_imageUrl != null && _imageUrl!.isNotEmpty)
+                        ? Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                                child: Image.network(
+                                  _imageUrl!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 200,
+                                  errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() => _imageUrl = null);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : _imagePlaceholder(),
+              ),
             ),
             const SizedBox(height: 24),
             _label('Title *'),
@@ -142,7 +204,96 @@ class _CreateNewsScreenState extends State<CreateNewsScreen> {
         borderRadius: BorderRadius.circular(AppTheme.radiusInput),
         borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      errorStyle: const TextStyle(height: 0, fontSize: 0),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
+  Future<void> _uploadImage() async {
+    final user = FirebaseAuthService.instance.currentUser;
+    if (user == null) return;
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+    try {
+      final picker = ImagePicker();
+      final xFile = await picker.pickImage(source: source, maxWidth: 1920, maxHeight: 1080, imageQuality: 85);
+      if (xFile == null || !mounted) return;
+      final bytes = await xFile.readAsBytes();
+      if (bytes.length > FirebaseStorageService.maxBytes) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image must be under 1MB. Please choose a smaller image.')),
+          );
+        }
+        return;
+      }
+      setState(() => _uploadingImage = true);
+      final path = FirebaseStorageService.instance.uniquePath('news/${user.uid}', extension: 'jpg');
+      final url = await FirebaseStorageService.instance.uploadImage(bytes: bytes, path: path);
+      if (!mounted) return;
+      setState(() {
+        _uploadingImage = false;
+        if (url != null) {
+          _imageUrl = url;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image uploaded successfully.'), backgroundColor: Colors.green),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Upload failed. Please try again.')));
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _uploadingImage = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Widget _imagePlaceholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.camera_alt, size: 36, color: Colors.pink.shade400),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              'Click to upload image / प्रतिमा अपलोड करण्यासाठी क्लिक करा',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: Colors.pink.shade600),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

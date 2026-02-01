@@ -46,12 +46,41 @@ class MatrimonyProfileDetailScreen extends StatelessWidget {
     final isGroom = type == 'groom';
     final name = _orDash(_str(profile['name']));
     final phone = _orDash(_str(profile['phone']));
+    final whatsappNumber = _orDash(_str(profile['whatsappNumber']));
     final email = _orDash(_str(profile['email']));
+    final dateOfBirth = _orDash(_str(profile['dateOfBirth']));
+    final age = _orDash(_str(profile['age']));
+    final birthTime = _orDash(_str(profile['birthTime']));
+    final birthPlace = _orDash(_str(profile['birthPlace']));
+    final height = _orDash(_str(profile['height']));
+    final weight = _orDash(_str(profile['weight']));
+    final complexion = _orDash(_str(profile['complexion']));
+    final bloodGroup = _orDash(_str(profile['bloodGroup']));
+    final diet = _orDash(_str(profile['diet']));
+    final manglik = _orDash(_str(profile['manglik']));
+    final nakshatra = _orDash(_str(profile['nakshatra']));
+    final rashi = _orDash(_str(profile['rashi']));
+    final gotra = _orDash(_str(profile['gotra']));
+    final maritalStatus = _orDash(_str(profile['maritalStatus']));
+    final disability = _orDash(_str(profile['disability']));
     final education = _orDash(_str(profile['education']));
     final occupation = _orDash(_str(profile['occupation']));
     final subcaste = _orDash(_str(profile['subcaste']));
-    final maritalStatus = _orDash(_str(profile['maritalStatus']));
-    final city = _orDash(_str(profile['city']));
+    final district = _orDash(_str(profile['district']));
+    final state = _orDash(_str(profile['state']));
+    final country = _orDash(_str(profile['country']));
+    final familyValues = _orDash(_str(profile['familyValues']));
+    final financialOutlook = _orDash(_str(profile['financialOutlook']));
+    final communicationStyle = _orDash(_str(profile['communicationStyle']));
+    final hobbiesInterests = _orDash(_str(profile['hobbiesInterests']));
+    final lifeGoals = _orDash(_str(profile['lifeGoals']));
+    final expectedEducation = _orDash(_str(profile['expectedEducation']));
+    final expectedOccupation = _orDash(_str(profile['expectedOccupation']));
+    final expectedHeight = _orDash(_str(profile['expectedHeight']));
+    final expectedFamilyValues = _orDash(_str(profile['expectedFamilyValues']));
+    final expectedFinancialOutlook = _orDash(_str(profile['expectedFinancialOutlook']));
+    final expectedCommunicationStyle = _orDash(_str(profile['expectedCommunicationStyle']));
+    final otherExpectations = _orDash(_str(profile['otherExpectations']));
 
     final rawFamily = profile['familyMembers'];
     final List<Map<String, dynamic>> familyList = rawFamily is List
@@ -83,6 +112,7 @@ class MatrimonyProfileDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Personal Information Section
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
               child: Padding(
@@ -102,20 +132,132 @@ class MatrimonyProfileDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    _sectionHeader('Personal Information / वैयक्तिक माहिती'),
                     _row('Full Name / मुलाचे पूर्ण नाव', name),
+                    _row('Date of Birth / जन्मतारीख', dateOfBirth),
+                    _row('Age / वय', age),
+                    _row('Birth Time / जन्म वेळ', birthTime),
+                    _row('Birth Place / जन्मस्थान', birthPlace),
+                    _row('Height / उंची', height),
+                    _row('Weight / वजन', weight),
+                    _row('Complexion / रंग', complexion),
+                    _row('Blood Group / रक्तगट', bloodGroup),
+                    _row('Diet / आहार', diet),
                     _row('Marital Status / वैवाहिक स्थिती', maritalStatus),
-                    _row('Sub Caste / पोटजात', subcaste),
+                    _row('Disability / अपंगत्व', disability),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Astrological Information
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Astrological Information / ज्योतिषीय माहिती'),
+                    _row('Manglik / मंगळिक', manglik),
+                    _row('Nakshatra / नक्षत्र', nakshatra),
+                    _row('Rashi / राशी', rashi),
+                    _row('Gotra / गोत्र', gotra),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Contact & Education
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Contact & Education / संपर्क आणि शिक्षण'),
                     _row('Phone / मोबाईल नंबर', phone),
+                    _row('WhatsApp / व्हॉट्सऍप', whatsappNumber),
                     _row('Email / ईमेल आयडी', email),
                     _row('Education / शिक्षण', education),
                     _row('Occupation / व्यवसाय / नोकरी', occupation),
-                    _row('City / शहर', city),
-                    if (familyList.isNotEmpty) ...[
-                      const SizedBox(height: 20),
-                      Text(
-                        'Family Details / कौटुंबिक माहिती',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
-                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Location
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Location / स्थान'),
+                    _row('Sub Caste / पोटजात', subcaste),
+                    _row('District / जिल्हा', district),
+                    _row('State / राज्य', state),
+                    _row('Country / देश', country),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Lifestyle
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Lifestyle / जीवनशैली'),
+                    _row('Family Values / कौटुंबिक मूल्ये', familyValues),
+                    _row('Financial Outlook / आर्थिक दृष्टिकोन', financialOutlook),
+                    _row('Communication Style / संवाद शैली', communicationStyle),
+                    if (hobbiesInterests.isNotEmpty && hobbiesInterests != '—')
+                      _row('Hobbies & Interests / छंद आणि आवडी', hobbiesInterests),
+                    if (lifeGoals.isNotEmpty && lifeGoals != '—')
+                      _row('Life Goals / जीवनाची ध्येये', lifeGoals),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Partner Preferences
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Partner Preferences / जोडीदाराविषयी अपेक्षा'),
+                    _row('Expected Education / अपेक्षित शिक्षण', expectedEducation),
+                    _row('Expected Occupation / अपेक्षित व्यवसाय', expectedOccupation),
+                    _row('Expected Height / अपेक्षित उंची', expectedHeight),
+                    _row('Expected Family Values / अपेक्षित कौटुंबिक मूल्ये', expectedFamilyValues),
+                    _row('Expected Financial Outlook / अपेक्षित आर्थिक दृष्टिकोन', expectedFinancialOutlook),
+                    _row('Expected Communication Style / अपेक्षित संवाद शैली', expectedCommunicationStyle),
+                    if (otherExpectations.isNotEmpty && otherExpectations != '—')
+                      _row('Other Expectations / इतर अपेक्षा', otherExpectations),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Family Members
+            if (familyList.isNotEmpty)
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusCard)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionHeader('Family Details / कौटुंबिक माहिती'),
                       const SizedBox(height: 12),
                       ...familyList.map((m) {
                         final fn = _orDash(_str(m['name']));
@@ -144,12 +286,21 @@ class MatrimonyProfileDetailScreen extends StatelessWidget {
                         );
                       }),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import '../payment_config.dart';
 import '../services/firestore_service.dart';
-import 'business_registration_screen.dart';
+import 'business_registration_terms_screen.dart';
 import 'payment_screen.dart';
 
 /// Business directory — search by subcaste / place / business nature. Lists approved businesses.
@@ -48,19 +48,27 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
       result = result.where((b) {
-        final sc = b['subcaste'] as String? ?? '';
+        final sc = b['ownerSubcaste'] as String? ?? '';
         return sc == _subcaste;
       }).toList();
     }
     if (_place != null && _place!.isNotEmpty) {
       result = result.where((b) {
-        final p = b['place'] as String? ?? '';
-        return p == _place;
+        final city = (b['businessCityVillage'] as String? ?? '').toLowerCase();
+        final district = (b['businessDistrict'] as String? ?? '').toLowerCase();
+        final state = (b['businessState'] as String? ?? '').toLowerCase();
+        final placeLower = _place!.toLowerCase();
+        return city.contains(placeLower) ||
+            district.contains(placeLower) ||
+            state.contains(placeLower) ||
+            city == placeLower ||
+            district == placeLower ||
+            state == placeLower;
       }).toList();
     }
     if (_businessNature != null && _businessNature!.isNotEmpty) {
       result = result.where((b) {
-        final n = b['businessNature'] as String? ?? '';
+        final n = b['typeOfBusiness'] as String? ?? '';
         return n == _businessNature;
       }).toList();
     }
@@ -287,7 +295,9 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
     ).then((paid) {
       if (paid == true && context.mounted) {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const BusinessRegistrationScreen()),
+          MaterialPageRoute<bool>(
+            builder: (_) => const BusinessRegistrationTermsScreen(),
+          ),
         );
       }
     });

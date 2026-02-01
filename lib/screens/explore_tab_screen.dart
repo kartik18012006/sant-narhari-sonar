@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../app_theme.dart';
 import '../payment_config.dart';
 import '../services/language_service.dart';
+import '../widgets/responsive_wrapper.dart';
 import 'about_sant_narhari_screen.dart';
 import 'birthdays_screen.dart';
 import 'business_list_screen.dart';
-import 'create_ad_screen.dart';
+import 'advertisement_terms_screen.dart';
 import 'create_event_screen.dart';
 import 'my_events_screen.dart';
 import 'news_terms_screen.dart';
@@ -51,34 +53,43 @@ class ExploreTabScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              lang.pick('Community Features', 'समुदाय वैशिष्ट्ये'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+      body: ResponsiveWrapper(
+        maxWidth: kIsWeb ? 1200 : double.infinity,
+        padding: EdgeInsets.zero,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            kIsWeb ? 24 : 20,
+            20,
+            kIsWeb ? 24 : 20,
+            24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                lang.pick('Community Features', 'समुदाय वैशिष्ट्ये'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              lang.pick('Discover and connect with the Sonar community', 'सोनार समुदायाशी जोडा'),
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 20),
-            // Matrimony card
-            _matrimonyCard(context),
-            const SizedBox(height: 16),
-            // About Shree Sant Narhari card
-            _aboutSantNarhariCard(context),
-            const SizedBox(height: 24),
-            // Feature grid
-            _featureGrid(context),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                lang.pick('Discover and connect with the Sonar community', 'सोनार समुदायाशी जोडा'),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 20),
+              // Matrimony card
+              _matrimonyCard(context),
+              const SizedBox(height: 16),
+              // About Shree Sant Narhari card
+              _aboutSantNarhariCard(context),
+              const SizedBox(height: 24),
+              // Feature grid - responsive columns
+              _featureGrid(context),
+            ],
+          ),
         ),
       ),
         );
@@ -262,13 +273,17 @@ class ExploreTabScreen extends StatelessWidget {
       _FeatureItem('Feedback', lang.pick('Feedback', 'अभिप्राय'), lang.pick('Share Your Thoughts', 'तुमचे विचार सामायिक करा'), Icons.feedback_outlined),
     ];
 
+    // Responsive grid: 3 columns on desktop, 2 on mobile
+    final crossAxisCount = kIsWeb ? 3 : 2;
+    final childAspectRatio = kIsWeb ? 1.1 : 1.05;
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
+      crossAxisCount: crossAxisCount,
       mainAxisSpacing: 14,
       crossAxisSpacing: 14,
-      childAspectRatio: 1.05,
+      childAspectRatio: childAspectRatio,
       children: items
           .map((e) => _featureCard(
                 context: context,
@@ -314,7 +329,7 @@ class ExploreTabScreen extends StatelessWidget {
             if (paid == true && context.mounted) {
               Navigator.of(context).push(
                 MaterialPageRoute<bool>(
-                  builder: (_) => const CreateAdScreen(),
+                  builder: (_) => const AdvertisementTermsScreen(),
                 ),
               );
             }

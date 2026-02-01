@@ -16,15 +16,19 @@ class MatrimonyListScreen extends StatefulWidget {
 
 class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
   final _searchController = TextEditingController();
-  String? _city;
+  final _educationController = TextEditingController();
+  String? _place;
   String? _subcaste;
+  String? _maritalStatus;
 
-  static const List<String> _cityOptions = ['Pune', 'Mumbai', 'Nagpur', 'Nashik', 'Kolhapur', 'Sangli', 'Other'];
+  static const List<String> _placeOptions = ['Pune', 'Mumbai', 'Nagpur', 'Nashik', 'Kolhapur', 'Sangli', 'Other'];
   static List<String> get _subcasteOptions => AppTheme.subcasteOptions;
+  List<String> get _maritalStatusOptions => widget.isGroom ? AppTheme.maritalStatusOptionsGroom : AppTheme.maritalStatusOptionsBride;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _educationController.dispose();
     super.dispose();
   }
 
@@ -44,16 +48,34 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
             city.contains(query);
       }).toList();
     }
-    if (_city != null && _city!.isNotEmpty) {
+    if (_place != null && _place!.isNotEmpty) {
       result = result.where((m) {
-        final c = m['city'] as String? ?? '';
-        return c == _city;
+        final district = (m['district'] as String? ?? '').toLowerCase();
+        final state = (m['state'] as String? ?? '').toLowerCase();
+        final placeLower = _place!.toLowerCase();
+        return district.contains(placeLower) ||
+            state.contains(placeLower) ||
+            district == placeLower ||
+            state == placeLower;
       }).toList();
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
       result = result.where((m) {
         final sc = m['subcaste'] as String? ?? '';
         return sc == _subcaste;
+      }).toList();
+    }
+    final educationQuery = _educationController.text.trim();
+    if (educationQuery.isNotEmpty) {
+      result = result.where((m) {
+        final edu = (m['education'] as String? ?? '').toLowerCase();
+        return edu.contains(educationQuery.toLowerCase());
+      }).toList();
+    }
+    if (_maritalStatus != null && _maritalStatus!.isNotEmpty) {
+      result = result.where((m) {
+        final ms = m['maritalStatus'] as String? ?? '';
+        return ms == _maritalStatus;
       }).toList();
     }
     return result;
@@ -117,11 +139,11 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
                 ),
                 const SizedBox(height: 14),
                 _dropdown(
-                  label: 'City / शहर',
-                  value: _city,
-                  hint: 'Select city',
-                  items: _cityOptions,
-                  onChanged: (v) => setState(() => _city = v),
+                  label: 'Place / स्थान',
+                  value: _place,
+                  hint: 'Select city or district',
+                  items: _placeOptions,
+                  onChanged: (v) => setState(() => _place = v),
                 ),
                 const SizedBox(height: 12),
                 _dropdown(
@@ -130,6 +152,39 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
                   hint: 'Select subcaste',
                   items: _subcasteOptions,
                   onChanged: (v) => setState(() => _subcaste = v),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _educationController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'Higher Education / उच्च शिक्षण',
+                    hintText: 'e.g. B.E., M.B.A., Ph.D.',
+                    hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                      borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _dropdown(
+                  label: 'Marital Status / वैवाहिक स्थिती',
+                  value: _maritalStatus,
+                  hint: 'Select marital status',
+                  items: _maritalStatusOptions,
+                  onChanged: (v) => setState(() => _maritalStatus = v),
                 ),
                 const SizedBox(height: 8),
                 Align(
@@ -255,18 +310,23 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _MatrimonyFilterSheet(
-        initialCity: _city,
+        isGroom: widget.isGroom,
+        initialPlace: _place,
         initialSubcaste: _subcaste,
-        cityOptions: _cityOptions,
+        initialEducation: _educationController.text.trim(),
+        initialMaritalStatus: _maritalStatus,
+        placeOptions: _placeOptions,
         subcasteOptions: _subcasteOptions,
         onClear: () {
           _clearFilters();
           Navigator.of(ctx).pop();
         },
-        onApply: (city, subcaste) {
+        onApply: (place, subcaste, education, maritalStatus) {
           setState(() {
-            _city = city;
+            _place = place;
             _subcaste = subcaste;
+            _maritalStatus = maritalStatus;
+            _educationController.text = education ?? '';
           });
           Navigator.of(ctx).pop();
         },
@@ -312,43 +372,61 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
 
   void _clearFilters() {
     setState(() {
-      _city = null;
+      _place = null;
       _subcaste = null;
+      _maritalStatus = null;
       _searchController.clear();
+      _educationController.clear();
     });
   }
 }
 
 class _MatrimonyFilterSheet extends StatefulWidget {
   const _MatrimonyFilterSheet({
-    required this.initialCity,
+    required this.isGroom,
+    required this.initialPlace,
     required this.initialSubcaste,
-    required this.cityOptions,
+    required this.initialEducation,
+    required this.initialMaritalStatus,
+    required this.placeOptions,
     required this.subcasteOptions,
     required this.onClear,
     required this.onApply,
   });
 
-  final String? initialCity;
+  final bool isGroom;
+  final String? initialPlace;
   final String? initialSubcaste;
-  final List<String> cityOptions;
+  final String? initialEducation;
+  final String? initialMaritalStatus;
+  final List<String> placeOptions;
   final List<String> subcasteOptions;
   final VoidCallback onClear;
-  final void Function(String? city, String? subcaste) onApply;
+  final void Function(String? place, String? subcaste, String? education, String? maritalStatus) onApply;
 
   @override
   State<_MatrimonyFilterSheet> createState() => _MatrimonyFilterSheetState();
 }
 
 class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
-  late String? _city;
+  late String? _place;
   late String? _subcaste;
+  late String? _maritalStatus;
+  final _educationController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _city = widget.initialCity;
+    _place = widget.initialPlace;
     _subcaste = widget.initialSubcaste;
+    _maritalStatus = widget.initialMaritalStatus;
+    _educationController.text = widget.initialEducation ?? '';
+  }
+
+  @override
+  void dispose() {
+    _educationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -364,9 +442,35 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
           ),
           const SizedBox(height: 16),
-          _buildDropdown('City / शहर', _city, widget.cityOptions, (v) => setState(() => _city = v)),
+          _buildDropdown('Place / स्थान', _place, widget.placeOptions, (v) => setState(() => _place = v)),
           const SizedBox(height: 12),
           _buildDropdown('Subcaste / पोटजात', _subcaste, widget.subcasteOptions, (v) => setState(() => _subcaste = v)),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _educationController,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              labelText: 'Higher Education / उच्च शिक्षण',
+              hintText: 'e.g. B.E., M.B.A., Ph.D.',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildDropdown('Marital Status / वैवाहिक स्थिती', _maritalStatus, widget.isGroom ? AppTheme.maritalStatusOptionsGroom : AppTheme.maritalStatusOptionsBride, (v) => setState(() => _maritalStatus = v)),
           const SizedBox(height: 20),
           Row(
             children: [
@@ -384,7 +488,7 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => widget.onApply(_city, _subcaste),
+                  onPressed: () => widget.onApply(_place, _subcaste, _educationController.text.trim().isEmpty ? null : _educationController.text.trim(), _maritalStatus),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.gold,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusButton)),

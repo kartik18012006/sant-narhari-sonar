@@ -198,6 +198,15 @@ class _RsvpFormScreenState extends State<RsvpFormScreen> {
         borderRadius: BorderRadius.circular(AppTheme.radiusInput),
         borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      errorStyle: const TextStyle(height: 0, fontSize: 0),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }

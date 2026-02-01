@@ -14,21 +14,11 @@ class SocialWorkersScreen extends StatefulWidget {
 
 class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
   final _searchController = TextEditingController();
-  String? _location;
-  String? _region;
+  String? _place;
   String? _subcaste;
 
-  /// City/area options for location filter.
-  static const List<String> _locationOptions = ['Pune', 'Mumbai', 'Nagpur', 'Nashik', 'Kolhapur', 'Sangli', 'Other'];
-  /// Region/state options for second location filter.
-  static const List<String> _regionOptions = [
-    'Maharashtra',
-    'Karnataka',
-    'Gujarat',
-    'Madhya Pradesh',
-    'Goa',
-    'Other',
-  ];
+  /// Place options for location filter (cities/districts).
+  static const List<String> _placeOptions = ['Pune', 'Mumbai', 'Nagpur', 'Nashik', 'Kolhapur', 'Sangli', 'Other'];
   static List<String> get _subcasteOptions => AppTheme.subcasteOptions;
 
   @override
@@ -56,16 +46,27 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
             address.contains(query);
       }).toList();
     }
-    if (_location != null && _location!.isNotEmpty) {
+    if (_place != null && _place!.isNotEmpty) {
       result = result.where((s) {
-        final address = (s['address'] as String? ?? '').toLowerCase();
-        return address.contains(_location!.toLowerCase());
-      }).toList();
-    }
-    if (_region != null && _region!.isNotEmpty) {
-      result = result.where((s) {
-        final address = (s['address'] as String? ?? '').toLowerCase();
-        return address.contains(_region!.toLowerCase());
+        final permanentCity = (s['permanentVillageCity'] as String? ?? '').toLowerCase();
+        final permanentDistrict = (s['permanentDistrict'] as String? ?? '').toLowerCase();
+        final permanentState = (s['permanentState'] as String? ?? '').toLowerCase();
+        final currentCity = (s['currentVillageCity'] as String? ?? '').toLowerCase();
+        final currentDistrict = (s['currentDistrict'] as String? ?? '').toLowerCase();
+        final currentState = (s['currentState'] as String? ?? '').toLowerCase();
+        final placeLower = _place!.toLowerCase();
+        return permanentCity.contains(placeLower) ||
+            permanentDistrict.contains(placeLower) ||
+            permanentState.contains(placeLower) ||
+            currentCity.contains(placeLower) ||
+            currentDistrict.contains(placeLower) ||
+            currentState.contains(placeLower) ||
+            permanentCity == placeLower ||
+            permanentDistrict == placeLower ||
+            permanentState == placeLower ||
+            currentCity == placeLower ||
+            currentDistrict == placeLower ||
+            currentState == placeLower;
       }).toList();
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
@@ -157,19 +158,11 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
                 ),
                 const SizedBox(height: 14),
                 _dropdown(
-                  label: 'Location / स्थान',
-                  value: _location,
-                  hint: 'Select city or area',
-                  items: _locationOptions,
-                  onChanged: (v) => setState(() => _location = v),
-                ),
-                const SizedBox(height: 12),
-                _dropdown(
-                  label: 'Region / प्रदेश',
-                  value: _region,
-                  hint: 'Select region or state',
-                  items: _regionOptions,
-                  onChanged: (v) => setState(() => _region = v),
+                  label: 'Place / स्थान',
+                  value: _place,
+                  hint: 'Select city or district',
+                  items: _placeOptions,
+                  onChanged: (v) => setState(() => _place = v),
                 ),
                 const SizedBox(height: 12),
                 _dropdown(
@@ -285,21 +278,18 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _FilterSheetContent(
-        initialLocation: _location,
-        initialRegion: _region,
+        initialPlace: _place,
         initialSubcaste: _subcaste,
-        locationOptions: _locationOptions,
-        regionOptions: _regionOptions,
+        placeOptions: _placeOptions,
         subcasteOptions: _subcasteOptions,
         dropdownBuilder: _dropdown,
         onClear: () {
           _clearFilters();
           Navigator.of(ctx).pop();
         },
-        onApply: (location, region, subcaste) {
+        onApply: (place, subcaste) {
           setState(() {
-            _location = location;
-            _region = region;
+            _place = place;
             _subcaste = subcaste;
           });
           Navigator.of(ctx).pop();
@@ -354,8 +344,7 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
 
   void _clearFilters() {
     setState(() {
-      _location = null;
-      _region = null;
+      _place = null;
       _subcaste = null;
       _searchController.clear();
     });
@@ -364,22 +353,18 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
 
 class _FilterSheetContent extends StatefulWidget {
   const _FilterSheetContent({
-    required this.initialLocation,
-    required this.initialRegion,
+    required this.initialPlace,
     required this.initialSubcaste,
-    required this.locationOptions,
-    required this.regionOptions,
+    required this.placeOptions,
     required this.subcasteOptions,
     required this.dropdownBuilder,
     required this.onClear,
     required this.onApply,
   });
 
-  final String? initialLocation;
-  final String? initialRegion;
+  final String? initialPlace;
   final String? initialSubcaste;
-  final List<String> locationOptions;
-  final List<String> regionOptions;
+  final List<String> placeOptions;
   final List<String> subcasteOptions;
   final Widget Function({
     required String label,
@@ -389,22 +374,20 @@ class _FilterSheetContent extends StatefulWidget {
     required ValueChanged<String?> onChanged,
   }) dropdownBuilder;
   final VoidCallback onClear;
-  final void Function(String? location, String? region, String? subcaste) onApply;
+  final void Function(String? place, String? subcaste) onApply;
 
   @override
   State<_FilterSheetContent> createState() => _FilterSheetContentState();
 }
 
 class _FilterSheetContentState extends State<_FilterSheetContent> {
-  late String? _location;
-  late String? _region;
+  late String? _place;
   late String? _subcaste;
 
   @override
   void initState() {
     super.initState();
-    _location = widget.initialLocation;
-    _region = widget.initialRegion;
+    _place = widget.initialPlace;
     _subcaste = widget.initialSubcaste;
   }
 
@@ -422,19 +405,11 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
           ),
           const SizedBox(height: 16),
           widget.dropdownBuilder(
-            label: 'Location / स्थान',
-            value: _location,
-            hint: 'Select city or area',
-            items: widget.locationOptions,
-            onChanged: (v) => setState(() => _location = v),
-          ),
-          const SizedBox(height: 12),
-          widget.dropdownBuilder(
-            label: 'Region / प्रदेश',
-            value: _region,
-            hint: 'Select region or state',
-            items: widget.regionOptions,
-            onChanged: (v) => setState(() => _region = v),
+            label: 'Place / स्थान',
+            value: _place,
+            hint: 'Select city or district',
+            items: widget.placeOptions,
+            onChanged: (v) => setState(() => _place = v),
           ),
           const SizedBox(height: 12),
           widget.dropdownBuilder(
@@ -461,7 +436,7 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => widget.onApply(_location, _region, _subcaste),
+                  onPressed: () => widget.onApply(_place, _subcaste),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.gold,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusButton)),

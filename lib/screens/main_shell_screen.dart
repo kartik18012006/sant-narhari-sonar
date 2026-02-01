@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../app_theme.dart';
 import '../services/language_service.dart';
+import '../widgets/responsive_wrapper.dart';
 import 'about_tab_screen.dart';
 import 'explore_tab_screen.dart';
 import 'home_tab_screen.dart';
@@ -93,14 +95,18 @@ class _MainShellScreenState extends State<MainShellScreen> {
               ),
             ),
           ),
-          body: IndexedStack(
-            index: _currentIndex,
-            children: const [
-              HomeTabScreen(),
-              ExploreTabScreen(),
-              AboutTabScreen(),
-              ProfileTabScreen(),
-            ],
+          body: ResponsiveWrapper(
+            maxWidth: kIsWeb ? 1200 : double.infinity,
+            padding: EdgeInsets.zero,
+            child: IndexedStack(
+              index: _currentIndex,
+              children: const [
+                HomeTabScreen(),
+                ExploreTabScreen(),
+                AboutTabScreen(),
+                ProfileTabScreen(),
+              ],
+            ),
           ),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _currentIndex,
