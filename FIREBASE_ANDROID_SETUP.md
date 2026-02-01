@@ -20,19 +20,45 @@ The error means Firebase does not recognize your app. Add your Android app’s *
 
 ## 3. Add SHA fingerprints
 
+**⚠️ IMPORTANT**: SHA keys are NOT automatically integrated. You must manually add them to Firebase Console.
+
+### Quick Method: Use the Helper Script
+
+Run this command to get your SHA fingerprints:
+
+```bash
+cd android
+./get_sha_keys.sh
+```
+
+This will show you:
+- Debug keystore SHA-1 and SHA-256 (for testing/emulator)
+- Release keystore SHA-1 and SHA-256 (for production, if configured)
+
+### Manual Method: Get SHA Keys Manually
+
+**For Debug Keystore** (testing/emulator):
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
+**For Release Keystore** (production):
+```bash
+keytool -list -v -keystore <path-to-your-release.keystore> -alias <your-alias>
+```
+
+### Add SHA Keys to Firebase Console
+
 In **Project settings** → **Your apps** → your Android app:
 
 1. Find the **SHA certificate fingerprints** section
 2. Click **Add fingerprint**
-3. Add this **SHA-1** (debug build / emulator):
-   ```
-   2C:E7:5C:56:91:46:48:48:4E:64:D5:25:60:B4:E3:BF:FC:4B:44:CF
-   ```
-4. Click **Add fingerprint** again and add this **SHA-256**:
-   ```
-   D4:E7:50:BB:03:2F:76:FF:8D:05:30:27:B3:23:B3:2A:10:B9:7F:5C:D0:88:10:08:37:3B:7D:57:21:B3:B0:52
-   ```
-5. Save
+3. Paste your **SHA-1** fingerprint
+4. Click **Add fingerprint** again and paste your **SHA-256** fingerprint
+5. **Important**: Add BOTH debug AND release SHA keys if you use both keystores
+6. Save
+
+**Note**: The SHA values shown in this file are examples. Always use the script or command above to get YOUR current SHA keys, as they may differ.
 
 ## 4. Deploy Firestore rules (fix permission-denied)
 

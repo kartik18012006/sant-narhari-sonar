@@ -33,18 +33,19 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- Firebase SDK for web (same project as mobile: sant-narhari-sonar). Initialized from Dart. -->
-  <!-- Updated to 11.0.0+ for reCAPTCHA Enterprise SMS defense support -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-storage-compat.js"></script>
+  <!-- Updated to 11.1.0+ for reCAPTCHA Enterprise SMS defense support -->
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-storage-compat.js"></script>
 </head>
 <body>
   <!-- reCAPTCHA container for Firebase Phone Auth on web -->
-  <!-- This container is required for phone authentication on web -->
+  <!-- This container is REQUIRED for phone authentication on web -->
+  <!-- Firebase automatically uses this container for reCAPTCHA Enterprise -->
   <!-- Make sure reCAPTCHA Enterprise is enabled in Firebase Console: -->
-  <!-- Authentication → Settings → reCAPTCHA Enterprise -->
-  <div id="recaptcha-container" style="position: fixed; bottom: 0; left: 0; z-index: 9999;"></div>
+  <!-- Authentication → Settings → reCAPTCHA → Configure site keys -->
+  <div id="recaptcha-container" style="position: fixed; bottom: 0; left: 0; width: 1px; height: 1px; overflow: hidden; z-index: 9999;"></div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
