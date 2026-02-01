@@ -413,96 +413,68 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
               icon: Icons.person,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Sub-caste / पोटजात',
-                    value: _subcaste,
-                    items: AppTheme.subcasteOptions,
-                    icon: Icons.category,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Gender / लिंग',
-                    value: _gender,
-                    items: AppTheme.genderOptions,
-                    icon: Icons.person_outline,
-                  ),
-                ),
-              ],
+            _buildDropdown(
+              label: 'Sub-caste / पोटजात',
+              value: _subcaste,
+              items: AppTheme.subcasteOptions,
+              icon: Icons.category,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Blood Group / रक्तगट',
-                    value: _bloodGroup,
-                    items: AppTheme.bloodGroupOptions,
-                    icon: Icons.water_drop,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Date of Birth / जन्मतारीख',
-                    controller: _dateOfBirthController,
-                    icon: Icons.calendar_today,
-                    readOnly: true,
-                    onTap: _pickDateOfBirth,
-                    hint: 'dd/mm/yyyy',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Diet / आहार',
-                    value: _diet,
-                    items: AppTheme.dietOptions,
-                    icon: Icons.restaurant,
-                  ),
-                ),
-              ],
+            _buildDropdown(
+              label: 'Gender / लिंग',
+              value: _gender,
+              items: AppTheme.genderOptions,
+              icon: Icons.person_outline,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown(
+              label: 'Blood Group / रक्तगट',
+              value: _bloodGroup,
+              items: AppTheme.bloodGroupOptions,
+              icon: Icons.water_drop,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Date of Birth / जन्मतारीख',
+              controller: _dateOfBirthController,
+              icon: Icons.calendar_today,
+              readOnly: true,
+              onTap: _pickDateOfBirth,
+              hint: 'dd/mm/yyyy',
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown(
+              label: 'Diet / आहार',
+              value: _diet,
+              items: AppTheme.dietOptions,
+              icon: Icons.restaurant,
             ),
             const SizedBox(height: 32),
 
             // Section 2: Contact Details
             _buildSectionHeader('Contact Details / संपर्क तपशील', color: Colors.pink.shade100, icon: Icons.phone),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Mobile Number / मोबाईल नंबर',
-                    controller: _mobileController,
-                    icon: Icons.phone,
-                    keyboardType: TextInputType.phone,
-                    prefix: '+91 ',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'WhatsApp Number / व्हॉट्‌सअॅप नंबर',
-                    controller: _whatsappController,
-                    icon: Icons.chat,
-                    keyboardType: TextInputType.phone,
-                    prefix: '+91 ',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Email ID / ईमेल आयडी',
-                    controller: _emailController,
-                    icon: Icons.email,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Mobile Number / मोबाईल नंबर',
+              controller: _mobileController,
+              icon: Icons.phone,
+              keyboardType: TextInputType.phone,
+              prefix: '+91 ',
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'WhatsApp Number / व्हॉट्‌सअॅप नंबर',
+              controller: _whatsappController,
+              icon: Icons.chat,
+              keyboardType: TextInputType.phone,
+              prefix: '+91 ',
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Email ID / ईमेल आयडी',
+              controller: _emailController,
+              icon: Icons.email,
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 32),
 
@@ -517,61 +489,41 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
               icon: Icons.location_on,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Pincode / पिनकोड',
-                    controller: _permanentPincodeController,
-                    icon: Icons.pin,
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Village/City / गाव/शहर',
-                    controller: _permanentVillageCityController,
-                    icon: Icons.location_city,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Taluka / तालुका',
-                    controller: _permanentTalukaController,
-                    icon: Icons.map,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Pincode / पिनकोड',
+              controller: _permanentPincodeController,
+              icon: Icons.pin,
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'District / जिल्हा',
-                    controller: _permanentDistrictController,
-                    icon: Icons.location_city,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'State / राज्य',
-                    controller: _permanentStateController,
-                    icon: Icons.map,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Country / देश',
-                    controller: _permanentCountryController,
-                    icon: Icons.public,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Village/City / गाव/शहर',
+              controller: _permanentVillageCityController,
+              icon: Icons.location_city,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Taluka / तालुका',
+              controller: _permanentTalukaController,
+              icon: Icons.map,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'District / जिल्हा',
+              controller: _permanentDistrictController,
+              icon: Icons.location_city,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'State / राज्य',
+              controller: _permanentStateController,
+              icon: Icons.map,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Country / देश',
+              controller: _permanentCountryController,
+              icon: Icons.public,
             ),
             const SizedBox(height: 24),
             _buildSubSectionHeader('2. Current Address / वर्तमान पत्ता'),
@@ -605,61 +557,41 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
               icon: Icons.location_on,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Pincode / पिनकोड',
-                    controller: _currentPincodeController,
-                    icon: Icons.pin,
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Village/City / गाव/शहर',
-                    controller: _currentVillageCityController,
-                    icon: Icons.location_city,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Taluka / तालुका',
-                    controller: _currentTalukaController,
-                    icon: Icons.map,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Pincode / पिनकोड',
+              controller: _currentPincodeController,
+              icon: Icons.pin,
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'District / जिल्हा',
-                    controller: _currentDistrictController,
-                    icon: Icons.location_city,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'State / राज्य',
-                    controller: _currentStateController,
-                    icon: Icons.map,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Country / देश',
-                    controller: _currentCountryController,
-                    icon: Icons.public,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Village/City / गाव/शहर',
+              controller: _currentVillageCityController,
+              icon: Icons.location_city,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Taluka / तालुका',
+              controller: _currentTalukaController,
+              icon: Icons.map,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'District / जिल्हा',
+              controller: _currentDistrictController,
+              icon: Icons.location_city,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'State / राज्य',
+              controller: _currentStateController,
+              icon: Icons.map,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Country / देश',
+              controller: _currentCountryController,
+              icon: Icons.public,
             ),
             const SizedBox(height: 32),
 
@@ -999,7 +931,7 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
                         'Select... / निवडा...',
                         style: TextStyle(
                           fontSize: 14,
-                          color: value == null ? Colors.white : Colors.white70,
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -1019,13 +951,14 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            item,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isSelected ? Colors.white : Colors.white70,
-                            ),
+                          child:                         Text(
+                          item,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isSelected ? AppTheme.gold : Colors.grey.shade800,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
+                        ),
                         ),
                       ],
                     ),
@@ -1066,8 +999,8 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
                       )),
                 ];
               },
-              dropdownColor: Colors.grey.shade900,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              dropdownColor: Colors.white,
+              style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
               icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade700),
               menuMaxHeight: 300,
             ),

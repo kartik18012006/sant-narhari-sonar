@@ -40,7 +40,10 @@
 </head>
 <body>
   <!-- reCAPTCHA container for Firebase Phone Auth on web -->
-  <div id="recaptcha-container"></div>
+  <!-- This container is required for phone authentication on web -->
+  <!-- Make sure reCAPTCHA Enterprise is enabled in Firebase Console: -->
+  <!-- Authentication → Settings → reCAPTCHA Enterprise -->
+  <div id="recaptcha-container" style="position: fixed; bottom: 0; left: 0; z-index: 9999;"></div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

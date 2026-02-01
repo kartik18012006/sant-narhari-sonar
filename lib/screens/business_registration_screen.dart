@@ -521,50 +521,34 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
             // Section 3: Business Details
             _buildSectionHeader('Business Details / व्यवसाय तपशील', color: Colors.pink.shade100),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Business Name / व्यवसायाचे नाव',
-                    controller: _businessNameController,
-                    icon: Icons.business,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Type of Business / Nature of Work / व्यवसायाचा प्रकार / कामाचे स्वरूप',
-                    controller: _typeOfBusinessController,
-                    icon: Icons.work,
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Business Name / व्यवसायाचे नाव',
+              controller: _businessNameController,
+              icon: Icons.business,
+              required: true,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Business Structure / व्यवसाय रचना',
-                    value: _businessStructure,
-                    items: AppTheme.businessStructureOptions,
-                    icon: Icons.account_balance,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Date of Establishment / स्थापनेची तारीख',
-                    controller: _dateOfEstablishmentController,
-                    icon: Icons.calendar_today,
-                    readOnly: true,
-                    onTap: _pickDateOfEstablishment,
-                    hint: 'dd/mm/yyyy',
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Type of Business / Nature of Work / व्यवसायाचा प्रकार / कामाचे स्वरूप',
+              controller: _typeOfBusinessController,
+              icon: Icons.work,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown(
+              label: 'Business Structure / व्यवसाय रचना',
+              value: _businessStructure,
+              items: AppTheme.businessStructureOptions,
+              icon: Icons.account_balance,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Date of Establishment / स्थापनेची तारीख',
+              controller: _dateOfEstablishmentController,
+              icon: Icons.calendar_today,
+              readOnly: true,
+              onTap: _pickDateOfEstablishment,
+              hint: 'dd/mm/yyyy',
             ),
             const SizedBox(height: 32),
 
@@ -607,87 +591,61 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
               required: true,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'PIN Code / पिन कोड',
-                    controller: _businessPincodeController,
-                    icon: Icons.pin,
-                    keyboardType: TextInputType.number,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'City/Village / शहर/गाव',
-                    controller: _businessCityVillageController,
-                    icon: Icons.location_city,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Taluka / तालुका',
-                    controller: _businessTalukaController,
-                    icon: Icons.map,
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'PIN Code / पिन कोड',
+              controller: _businessPincodeController,
+              icon: Icons.pin,
+              keyboardType: TextInputType.number,
+              required: true,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'District / जिल्हा',
-                    controller: _businessDistrictController,
-                    icon: Icons.location_city,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'State / राज्य',
-                    controller: _businessStateController,
-                    icon: Icons.map,
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'City/Village / शहर/गाव',
+              controller: _businessCityVillageController,
+              icon: Icons.location_city,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Taluka / तालुका',
+              controller: _businessTalukaController,
+              icon: Icons.map,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'District / जिल्हा',
+              controller: _businessDistrictController,
+              icon: Icons.location_city,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'State / राज्य',
+              controller: _businessStateController,
+              icon: Icons.map,
+              required: true,
             ),
             const SizedBox(height: 32),
 
             // Section 7: Contact Information
             _buildSectionHeader('Contact Information / संपर्क माहिती', color: Colors.pink.shade100, icon: Icons.phone),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Business Email ID / व्यवसाय ईमेल आयडी',
-                    controller: _businessEmailController,
-                    icon: Icons.email,
-                    keyboardType: TextInputType.emailAddress,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Business Phone / Mobile Number / व्यवसाय फोन / मोबाईल नंबर',
-                    controller: _businessPhoneController,
-                    icon: Icons.phone,
-                    keyboardType: TextInputType.phone,
-                    prefix: '+91 ',
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Business Email ID / व्यवसाय ईमेल आयडी',
+              controller: _businessEmailController,
+              icon: Icons.email,
+              keyboardType: TextInputType.emailAddress,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Business Phone / Mobile Number / व्यवसाय फोन / मोबाईल नंबर',
+              controller: _businessPhoneController,
+              icon: Icons.phone,
+              keyboardType: TextInputType.phone,
+              prefix: '+91 ',
+              required: true,
             ),
             const SizedBox(height: 16),
             _buildTextField(
@@ -700,77 +658,53 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
             // Section 8: Owner Details
             _buildSectionHeader('2 Owner Details / मालक तपशील', color: Colors.pink.shade100, icon: Icons.person),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Full Name / पूर्ण नाव',
-                    controller: _ownerNameController,
-                    icon: Icons.person,
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Owner Sub-caste / मालकाची पोटजात',
-                    value: _ownerSubcaste,
-                    items: AppTheme.subcasteOptions,
-                    icon: Icons.category,
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Full Name / पूर्ण नाव',
+              controller: _ownerNameController,
+              icon: Icons.person,
+              required: true,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Date of Birth / जन्मतारीख',
-                    controller: _ownerDateOfBirthController,
-                    icon: Icons.calendar_today,
-                    readOnly: true,
-                    onTap: _pickOwnerDateOfBirth,
-                    hint: 'dd/mm/yyyy',
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown(
-                    label: 'Gender / लिंग',
-                    value: _ownerGender,
-                    items: AppTheme.genderOptions,
-                    icon: Icons.person_outline,
-                    required: true,
-                  ),
-                ),
-              ],
+            _buildDropdown(
+              label: 'Owner Sub-caste / मालकाची पोटजात',
+              value: _ownerSubcaste,
+              items: AppTheme.subcasteOptions,
+              icon: Icons.category,
+              required: true,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Mobile Number / मोबाईल नंबर',
-                    controller: _ownerMobileController,
-                    icon: Icons.phone,
-                    keyboardType: TextInputType.phone,
-                    prefix: '+91 ',
-                    required: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Email ID / ईमेल आयडी',
-                    controller: _ownerEmailController,
-                    icon: Icons.email,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-              ],
+            _buildTextField(
+              label: 'Date of Birth / जन्मतारीख',
+              controller: _ownerDateOfBirthController,
+              icon: Icons.calendar_today,
+              readOnly: true,
+              onTap: _pickOwnerDateOfBirth,
+              hint: 'dd/mm/yyyy',
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildDropdown(
+              label: 'Gender / लिंग',
+              value: _ownerGender,
+              items: AppTheme.genderOptions,
+              icon: Icons.person_outline,
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Mobile Number / मोबाईल नंबर',
+              controller: _ownerMobileController,
+              icon: Icons.phone,
+              keyboardType: TextInputType.phone,
+              prefix: '+91 ',
+              required: true,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Email ID / ईमेल आयडी',
+              controller: _ownerEmailController,
+              icon: Icons.email,
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             _buildTextArea(

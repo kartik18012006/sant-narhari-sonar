@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
@@ -473,16 +474,45 @@ class _EmailVerificationBannerState extends State<_EmailVerificationBanner> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Verification email sent. Check your inbox.'),
+            content: Text('Verification email sent. Please check your inbox (and spam folder).'),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
           ),
         );
         widget.onResend?.call();
       }
-    } catch (_) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to send verification email.';
+        if (e.code == 'too-many-requests') {
+          errorMessage = 'Too many requests. Please wait a few minutes before requesting another verification email.';
+        } else if (e.code == 'user-not-found') {
+          errorMessage = 'User not found. Please sign in again.';
+        } else if (e.message != null) {
+          errorMessage = e.message!;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to send. Try again later.')),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        String errorMessage = 'Failed to send verification email. Please try again later.';
+        if (e.toString().contains('already verified')) {
+          errorMessage = 'Email is already verified.';
+        } else if (e.toString().contains('email')) {
+          errorMessage = e.toString();
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     } finally {

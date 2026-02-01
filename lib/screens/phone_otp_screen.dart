@@ -383,6 +383,13 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   }
 }
   String _friendlyPhoneError(String message) {
+    // Handle reCAPTCHA errors (especially for web)
+    if (message.contains('recaptcha') || 
+        message.contains('RECAPTCHA') ||
+        message.contains('identitytoolkit') ||
+        message.contains('reCAPTCHA')) {
+      return 'reCAPTCHA verification failed. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) and try again.';
+    }
     if (message.contains('invalid-phone-number') || message.contains('Invalid')) {
       return 'Invalid phone number. Use a valid 10-digit Indian mobile number.';
     }
@@ -394,6 +401,9 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
     }
     if (message.contains('play_integrity') || message.contains('safety')) {
       return 'Device verification issue. Ensure app is from Play Store or use test numbers in Firebase Console.';
+    }
+    if (message.contains('missing-recaptcha-token') || message.contains('missing-recaptcha-response')) {
+      return 'reCAPTCHA verification required. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console.';
     }
     return message.length > 100 ? message.substring(0, 100) + '...' : message;
   }
