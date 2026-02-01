@@ -1,110 +1,93 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
-/// Firebase Auth wrapper: phone OTP, email/password, sign out, auth state.
 class FirebaseAuthService {
-  FirebaseAuthService._();
-
-  static final FirebaseAuthService _instance = FirebaseAuthService._();
-  static FirebaseAuthService get instance => _instance;
+  FirebaseAuthService._internal();
+  static final FirebaseAuthService instance = FirebaseAuthService._internal();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  ConfirmationResult? _confirmationResult;
+  // =====================
+  // COMMON GETTERS
+  // =====================
 
   User? get currentUser => _auth.currentUser;
+
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  /// Send OTP to phone number
+  // =====================
+  // PHONE AUTH
+  // =====================
+
   Future<void> sendPhoneOtp({
     required String phoneNumber,
-    required Function(String verificationId) onCodeSent,
-    required Function(String error) onError,
+    required void Function(String verificationId) onCodeSent,
+    required void Function(String error) onError,
+    void Function(User user)? onVerificationCompleted,
   }) async {
-    final fullNumber =
-        phoneNumber.startsWith('+') ? phoneNumber : '+91$phoneNumber';
-
     try {
-      if (kIsWeb) {
-        // ✅ REQUIRED for Flutter Web
-        _confirmationResult =
-            await _auth.signInWithPhoneNumber(fullNumber);
-
-        // Web does not use verificationId
-        onCodeSent('web');
-      } else {
-        // ✅ Android / iOS
-        await _auth.verifyPhoneNumber(
-          phoneNumber: fullNumber,
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            await _auth.signInWithCredential(credential);
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            onError(e.message ?? e.code);
-          },
-          codeSent: (String verId, int? resendToken) {
-            onCodeSent(verId);
-          },
-          codeAutoRetrievalTimeout: (_) {},
-          timeout: const Duration(seconds: 120),
-        );
-      }
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          if (onVerificationCompleted != null) {
+            final result = await _auth.signInWithCredential(credential);
+            if (result.user != null) {
+              onVerificationCompleted(result.user!);
+            }
+          }
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          onError(e.message ?? e.code);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (_) {},
+      );
     } catch (e) {
       onError(e.toString());
     }
   }
 
-  /// Verify OTP and sign in
   Future<UserCredential?> verifyOtpAndSignIn({
     required String verificationId,
     required String smsCode,
   }) async {
-    try {
-      if (kIsWeb) {
-        if (_confirmationResult == null) {
-          throw Exception('OTP session expired. Please retry.');
-        }
-        return await _confirmationResult!.confirm(smsCode);
-      } else {
-        final credential = PhoneAuthProvider.credential(
-          verificationId: verificationId,
-          smsCode: smsCode,
-        );
-        return await _auth.signInWithCredential(credential);
-      }
-    } catch (e) {
-      rethrow;
-    }
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    return await _auth.signInWithCredential(credential);
   }
 
-  /// Email & password sign-in
+  // =====================
+  // EMAIL / PASSWORD
+  // =====================
+
   Future<UserCredential> signInWithEmailAndPassword({
     required String email,
     required String password,
-  }) async {
+  }) {
     return _auth.signInWithEmailAndPassword(
-      email: email.trim(),
+      email: email,
       password: password,
     );
   }
 
-  /// Create account with email & password
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
-  }) async {
+  }) {
     return _auth.createUserWithEmailAndPassword(
-      email: email.trim(),
+      email: email,
       password: password,
     );
   }
 
-  /// Send password reset email
-  Future<void> sendPasswordResetEmail(String email) async {
-    await _auth.sendPasswordResetEmail(email: email.trim());
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email: email);
   }
 
-  /// Send email verification
   Future<void> sendEmailVerification() async {
     final user = _auth.currentUser;
     if (user != null && !user.emailVerified) {
@@ -112,12 +95,14 @@ class FirebaseAuthService {
     }
   }
 
-  /// Reload user
   Future<void> reloadUser() async {
     await _auth.currentUser?.reload();
   }
 
-  /// Sign out
+  // =====================
+  // SIGN OUT
+  // =====================
+
   Future<void> signOut() async {
     await _auth.signOut();
   }
