@@ -10,7 +10,7 @@ class DefaultFirebaseOptions {
   /// Web config for project: sant-narhari-sonar
   /// Replace placeholders with values from Firebase Console → Project Settings → Your apps → Web app.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA66p2GptE2Qz9vFi40VAKNYOxoaH08GwA',
+    apiKey: 'AIzaSyA66p2GptE2Qz9vFi40VAkNYOxoaHO8GwA',
     appId: '1:732075543745:web:792b383a28ce6795d75840',
     messagingSenderId: '732075543745',
     projectId: 'sant-narhari-sonar',

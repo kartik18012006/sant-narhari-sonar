@@ -68,6 +68,17 @@ class FirestoreService {
     return _users.doc(uid).snapshots().map((doc) => doc.data());
   }
 
+  /// Get user by phone number (for checking if user already exists)
+  Future<List<Map<String, dynamic>>?> getUserByPhone(String phoneNumber) async {
+    final querySnapshot = await _users
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .limit(1)
+        .get();
+    
+    if (querySnapshot.docs.isEmpty) return null;
+    return querySnapshot.docs.map((doc) => {...doc.data(), 'uid': doc.id}).toList();
+  }
+
   /// Subscription: 1-year app access after ₹21 payment. Stored on user doc.
   static const String subscriptionValidUntilKey = 'subscriptionValidUntil';
 

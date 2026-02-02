@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,8 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   bool _loading = false;
   bool _otpSent = false;
   String? _phoneNumber; // Store full phone number with country code
+  int _otpCountdown = 120; // 120 seconds (2 minutes) to enter OTP
+  bool _canResend = false;
 
   @override
   void dispose() {
@@ -31,6 +34,25 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
     _otpController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _startOtpTimer() {
+    _otpCountdown = 120;
+    _canResend = false;
+    
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      
+      setState(() {
+        _otpCountdown--;
+        if (_otpCountdown == 0) {
+          _canResend = true;
+        }
+      });
+      
+      return _otpCountdown > 0 && _otpSent;
+    });
   }
 
   @override
@@ -250,7 +272,34 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
           'We sent a 4-digit code to +91 ${_phoneController.text.trim()}',
           style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 12),
+        if (_otpCountdown > 0)
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.gold.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.gold.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.timer_outlined, size: 18, color: AppTheme.goldDark),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Time remaining: ${_otpCountdown ~/ 60}:${(_otpCountdown % 60).toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.goldDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        const SizedBox(height: 16),
         TextField(
           controller: _otpController,
           keyboardType: TextInputType.number,
@@ -282,10 +331,17 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
         const SizedBox(height: 16),
         Center(
           child: TextButton(
-            onPressed: _loading ? null : _onResendOtp,
+            onPressed: (_loading || !_canResend) ? null : _onResendOtp,
             child: Text(
-              "Didn't receive code? Resend",
-              style: TextStyle(fontSize: 14, color: _loading ? Colors.grey : AppTheme.goldDark),
+              _canResend 
+                ? "Didn't receive code? Resend"
+                : _otpCountdown > 0 
+                  ? "Resend available in ${_otpCountdown}s"
+                  : "Didn't receive code? Resend",
+              style: TextStyle(
+                fontSize: 14, 
+                color: (_loading || !_canResend) ? Colors.grey : AppTheme.goldDark
+              ),
             ),
           ),
         ),
@@ -361,6 +417,7 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
           _otpSent = true;
           _loading = false;
         });
+        _startOtpTimer();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('OTP sent. Check your SMS.'),
@@ -454,86 +511,77 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
         return;
       }
 
-      // MSG91 OTP verified successfully, now authenticate with Firebase
-      // Generate email from phone number: phone_919999999999@santnarhari.com
-      final email = 'phone_$_phoneNumber@santnarhari.com';
-      // Use a default password (users won't need to know it since they use OTP)
-      final password = '${_phoneNumber}_default_pass_2024';
-
-      UserCredential? cred;
+      // MSG91 OTP verified successfully
+      // Since Firebase Phone Auth requires reCAPTCHA on web, use Anonymous Auth
+      // The phone number is already verified by MSG91
+      debugPrint('Phone verified via MSG91, authenticating with Firebase Anonymous...');
+      
+      final phoneNumber = '+91${_phoneController.text.trim()}';
+      
+      // Sign in anonymously (works on web without reCAPTCHA)
       try {
-        // Try to sign in first (user might already exist)
-        cred = await FirebaseAuthService.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-          // User doesn't exist or password changed, create new account
+        final cred = await FirebaseAuthService.instance.signInAnonymously();
+        
+        if (cred.user != null && mounted) {
+          final uid = cred.user!.uid;
+          final displayName = 'User ${_phoneController.text.trim()}';
+          
+          debugPrint('Anonymous auth successful, UID: $uid');
+          debugPrint('Saving verified phone to Firestore...');
+          
+          // Save the MSG91-verified phone number to Firestore
           try {
-            cred = await FirebaseAuthService.instance.createUserWithEmailAndPassword(
-              email: email,
-              password: password,
-            );
-          } catch (createError) {
-            if (mounted) {
-              setState(() => _loading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Account creation failed: ${createError.toString()}'),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            }
-            return;
-          }
-        } else {
-          rethrow;
-        }
-      }
-
-      if (cred.user != null && mounted) {
-        final uid = cred.user!.uid;
-        final phoneNumber = '+91${_phoneController.text.trim()}';
-        final displayName = 'User ${_phoneController.text.trim()}';
-        
-        // Let auth token propagate to Firestore to avoid permission-denied on first write
-        await Future.delayed(const Duration(milliseconds: 600));
-        if (!mounted) return;
-        
-        try {
-          await FirestoreService.instance.setUserProfile(
-            uid: uid,
-            email: email,
-            phoneNumber: phoneNumber,
-            displayName: displayName,
-          );
-        } on FirebaseException catch (e) {
-          if (e.code == 'permission-denied' && mounted) {
-            await Future.delayed(const Duration(milliseconds: 800));
-            if (!mounted) return;
             await FirestoreService.instance.setUserProfile(
               uid: uid,
-              email: email,
               phoneNumber: phoneNumber,
               displayName: displayName,
             );
-          } else {
-            rethrow;
+            debugPrint('User profile saved successfully');
+            
+            if (!mounted) return;
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const MainShellScreen()),
+              (route) => false,
+            );
+          } catch (e) {
+            debugPrint('Error saving profile: $e');
+            if (mounted) {
+              setState(() => _loading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to save profile: ${e.toString()}')),
+              );
+            }
           }
+        } else if (mounted) {
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Authentication failed. Please try again.')),
+          );
         }
-        
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainShellScreen()),
-          (route) => false,
-        );
-      } else if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Authentication failed. Please try again.')),
-        );
+      } on FirebaseAuthException catch (authError) {
+        debugPrint('Firebase Auth Error: ${authError.code} - ${authError.message}');
+        if (mounted) {
+          setState(() => _loading = false);
+          
+          String errorMessage;
+          if (authError.code == 'api-key-not-valid') {
+            errorMessage = 'Firebase setup incomplete. Please enable Anonymous Authentication in Firebase Console:\n\n'
+                '1. Go to Firebase Console\n'
+                '2. Authentication → Sign-in method\n'
+                '3. Enable "Anonymous"\n'
+                '4. Save and try again';
+          } else {
+            errorMessage = 'Firebase error: ${authError.message}';
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 8),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
