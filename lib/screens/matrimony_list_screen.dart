@@ -17,6 +17,9 @@ class MatrimonyListScreen extends StatefulWidget {
 class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
   final _searchController = TextEditingController();
   final _educationController = TextEditingController();
+  final _placeOtherController = TextEditingController();
+  final _subcasteOtherController = TextEditingController();
+  final _maritalStatusOtherController = TextEditingController();
   String? _place;
   String? _subcaste;
   String? _maritalStatus;
@@ -29,6 +32,9 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
   void dispose() {
     _searchController.dispose();
     _educationController.dispose();
+    _placeOtherController.dispose();
+    _subcasteOtherController.dispose();
+    _maritalStatusOtherController.dispose();
     super.dispose();
   }
 
@@ -49,10 +55,13 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
       }).toList();
     }
     if (_place != null && _place!.isNotEmpty) {
+      final placeToSearch = (_place!.contains('Other') || _place!.contains('इतर')) && _placeOtherController.text.trim().isNotEmpty
+          ? _placeOtherController.text.trim()
+          : _place!;
       result = result.where((m) {
         final district = (m['district'] as String? ?? '').toLowerCase();
         final state = (m['state'] as String? ?? '').toLowerCase();
-        final placeLower = _place!.toLowerCase();
+        final placeLower = placeToSearch.toLowerCase();
         return district.contains(placeLower) ||
             state.contains(placeLower) ||
             district == placeLower ||
@@ -60,9 +69,12 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
       }).toList();
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
+      final subcasteToSearch = (_subcaste!.contains('Other') || _subcaste!.contains('इतर')) && _subcasteOtherController.text.trim().isNotEmpty
+          ? _subcasteOtherController.text.trim()
+          : _subcaste!;
       result = result.where((m) {
         final sc = m['subcaste'] as String? ?? '';
-        return sc == _subcaste;
+        return sc == subcasteToSearch || sc.toLowerCase().contains(subcasteToSearch.toLowerCase());
       }).toList();
     }
     final educationQuery = _educationController.text.trim();
@@ -73,9 +85,12 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
       }).toList();
     }
     if (_maritalStatus != null && _maritalStatus!.isNotEmpty) {
+      final maritalStatusToSearch = (_maritalStatus!.contains('Other') || _maritalStatus!.contains('इतर')) && _maritalStatusOtherController.text.trim().isNotEmpty
+          ? _maritalStatusOtherController.text.trim()
+          : _maritalStatus!;
       result = result.where((m) {
         final ms = m['maritalStatus'] as String? ?? '';
-        return ms == _maritalStatus;
+        return ms == maritalStatusToSearch || ms.toLowerCase().contains(maritalStatusToSearch.toLowerCase());
       }).toList();
     }
     return result;
@@ -143,16 +158,84 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
                   value: _place,
                   hint: 'Select city or district',
                   items: _placeOptions,
-                  onChanged: (v) => setState(() => _place = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _place = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _placeOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_place != null && (_place!.contains('Other') || _place!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _placeOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify place / कृपया स्थान निर्दिष्ट करा',
+                      hintText: 'Enter place name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _dropdown(
                   label: 'Subcaste / पोटजात',
                   value: _subcaste,
                   hint: 'Select subcaste',
                   items: _subcasteOptions,
-                  onChanged: (v) => setState(() => _subcaste = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _subcaste = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _subcasteOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_subcaste != null && (_subcaste!.contains('Other') || _subcaste!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _subcasteOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify subcaste / कृपया पोटजात निर्दिष्ट करा',
+                      hintText: 'Enter subcaste name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 TextField(
                   controller: _educationController,
@@ -184,8 +267,42 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
                   value: _maritalStatus,
                   hint: 'Select marital status',
                   items: _maritalStatusOptions,
-                  onChanged: (v) => setState(() => _maritalStatus = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _maritalStatus = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _maritalStatusOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_maritalStatus != null && (_maritalStatus!.contains('Other') || _maritalStatus!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _maritalStatusOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify marital status / कृपया वैवाहिक स्थिती निर्दिष्ट करा',
+                      hintText: 'Enter marital status',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -321,12 +438,15 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
           _clearFilters();
           Navigator.of(ctx).pop();
         },
-        onApply: (place, subcaste, education, maritalStatus) {
+        onApply: (place, subcaste, education, maritalStatus, placeOther, subcasteOther, maritalStatusOther) {
           setState(() {
             _place = place;
             _subcaste = subcaste;
             _maritalStatus = maritalStatus;
             _educationController.text = education ?? '';
+            if (placeOther != null) _placeOtherController.text = placeOther;
+            if (subcasteOther != null) _subcasteOtherController.text = subcasteOther;
+            if (maritalStatusOther != null) _maritalStatusOtherController.text = maritalStatusOther;
           });
           Navigator.of(ctx).pop();
         },
@@ -377,6 +497,9 @@ class _MatrimonyListScreenState extends State<MatrimonyListScreen> {
       _maritalStatus = null;
       _searchController.clear();
       _educationController.clear();
+      _placeOtherController.clear();
+      _subcasteOtherController.clear();
+      _maritalStatusOtherController.clear();
     });
   }
 }
@@ -402,7 +525,7 @@ class _MatrimonyFilterSheet extends StatefulWidget {
   final List<String> placeOptions;
   final List<String> subcasteOptions;
   final VoidCallback onClear;
-  final void Function(String? place, String? subcaste, String? education, String? maritalStatus) onApply;
+  final void Function(String? place, String? subcaste, String? education, String? maritalStatus, String? placeOther, String? subcasteOther, String? maritalStatusOther) onApply;
 
   @override
   State<_MatrimonyFilterSheet> createState() => _MatrimonyFilterSheetState();
@@ -413,6 +536,9 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
   late String? _subcaste;
   late String? _maritalStatus;
   final _educationController = TextEditingController();
+  final _placeOtherController = TextEditingController();
+  final _subcasteOtherController = TextEditingController();
+  final _maritalStatusOtherController = TextEditingController();
 
   @override
   void initState() {
@@ -426,6 +552,9 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
   @override
   void dispose() {
     _educationController.dispose();
+    _placeOtherController.dispose();
+    _subcasteOtherController.dispose();
+    _maritalStatusOtherController.dispose();
     super.dispose();
   }
 
@@ -442,9 +571,73 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
           ),
           const SizedBox(height: 16),
-          _buildDropdown('Place / स्थान', _place, widget.placeOptions, (v) => setState(() => _place = v)),
+          _buildDropdown('Place / स्थान', _place, widget.placeOptions, (v) {
+            setState(() {
+              _place = v;
+              if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                _placeOtherController.clear();
+              }
+            });
+          }),
+          if (_place != null && (_place!.contains('Other') || _place!.contains('इतर'))) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _placeOtherController,
+              decoration: InputDecoration(
+                labelText: 'Please specify place / कृपया स्थान निर्दिष्ट करा',
+                hintText: 'Enter place name',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
-          _buildDropdown('Subcaste / पोटजात', _subcaste, widget.subcasteOptions, (v) => setState(() => _subcaste = v)),
+          _buildDropdown('Subcaste / पोटजात', _subcaste, widget.subcasteOptions, (v) {
+            setState(() {
+              _subcaste = v;
+              if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                _subcasteOtherController.clear();
+              }
+            });
+          }),
+          if (_subcaste != null && (_subcaste!.contains('Other') || _subcaste!.contains('इतर'))) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _subcasteOtherController,
+              decoration: InputDecoration(
+                labelText: 'Please specify subcaste / कृपया पोटजात निर्दिष्ट करा',
+                hintText: 'Enter subcaste name',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             controller: _educationController,
@@ -470,7 +663,39 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildDropdown('Marital Status / वैवाहिक स्थिती', _maritalStatus, widget.isGroom ? AppTheme.maritalStatusOptionsGroom : AppTheme.maritalStatusOptionsBride, (v) => setState(() => _maritalStatus = v)),
+          _buildDropdown('Marital Status / वैवाहिक स्थिती', _maritalStatus, widget.isGroom ? AppTheme.maritalStatusOptionsGroom : AppTheme.maritalStatusOptionsBride, (v) {
+            setState(() {
+              _maritalStatus = v;
+              if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                _maritalStatusOtherController.clear();
+              }
+            });
+          }),
+          if (_maritalStatus != null && (_maritalStatus!.contains('Other') || _maritalStatus!.contains('इतर'))) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _maritalStatusOtherController,
+              decoration: InputDecoration(
+                labelText: 'Please specify marital status / कृपया वैवाहिक स्थिती निर्दिष्ट करा',
+                hintText: 'Enter marital status',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [
@@ -488,7 +713,15 @@ class _MatrimonyFilterSheetState extends State<_MatrimonyFilterSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => widget.onApply(_place, _subcaste, _educationController.text.trim().isEmpty ? null : _educationController.text.trim(), _maritalStatus),
+                  onPressed: () => widget.onApply(
+                    _place,
+                    _subcaste,
+                    _educationController.text.trim().isEmpty ? null : _educationController.text.trim(),
+                    _maritalStatus,
+                    _placeOtherController.text.trim().isEmpty ? null : _placeOtherController.text.trim(),
+                    _subcasteOtherController.text.trim().isEmpty ? null : _subcasteOtherController.text.trim(),
+                    _maritalStatusOtherController.text.trim().isEmpty ? null : _maritalStatusOtherController.text.trim(),
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.gold,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusButton)),

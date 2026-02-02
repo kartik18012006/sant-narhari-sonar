@@ -25,6 +25,12 @@ class FirebaseAuthService {
     required void Function(String error) onError,
     void Function(User user)? onVerificationCompleted,
   }) async {
+    // Block phone authentication on Web - only allow on mobile platforms
+    if (kIsWeb) {
+      onError('Phone authentication is not available on web. Please use email and password to sign in.');
+      return;
+    }
+
     try {
       // Verify Firebase is initialized by checking app name
       try {
@@ -38,76 +44,42 @@ class FirebaseAuthService {
         return;
       }
 
-      // For web, we need to specify the reCAPTCHA container
-      if (kIsWeb) {
-        await _auth.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          timeout: const Duration(seconds: 60),
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            if (onVerificationCompleted != null) {
-              try {
-                final result = await _auth.signInWithCredential(credential);
-                if (result.user != null) {
-                  onVerificationCompleted(result.user!);
-                }
-              } catch (e) {
-                // Auto-verification failed, continue with manual OTP
+      // Mobile platforms (Android/iOS) only
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          if (onVerificationCompleted != null) {
+            try {
+              final result = await _auth.signInWithCredential(credential);
+              if (result.user != null) {
+                onVerificationCompleted(result.user!);
               }
+            } catch (e) {
+              // Auto-verification failed, continue with manual OTP
             }
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            String errorMessage = _getFriendlyErrorMessage(e, isWeb: true);
-            onError(errorMessage);
-          },
-          codeSent: (String verificationId, int? resendToken) {
-            onCodeSent(verificationId);
-          },
-          codeAutoRetrievalTimeout: (_) {},
-        );
-      } else {
-        // Mobile platforms (Android/iOS)
-        await _auth.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          timeout: const Duration(seconds: 60),
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            if (onVerificationCompleted != null) {
-              try {
-                final result = await _auth.signInWithCredential(credential);
-                if (result.user != null) {
-                  onVerificationCompleted(result.user!);
-                }
-              } catch (e) {
-                // Auto-verification failed, continue with manual OTP
-              }
-            }
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            String errorMessage = _getFriendlyErrorMessage(e, isWeb: false);
-            onError(errorMessage);
-          },
-          codeSent: (String verificationId, int? resendToken) {
-            onCodeSent(verificationId);
-          },
-          codeAutoRetrievalTimeout: (_) {},
-        );
-      }
+          }
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          String errorMessage = _getFriendlyErrorMessage(e, isWeb: false);
+          onError(errorMessage);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (_) {},
+      );
     } on FirebaseAuthException catch (e) {
-      String errorMessage = _getFriendlyErrorMessage(e, isWeb: kIsWeb);
+      String errorMessage = _getFriendlyErrorMessage(e, isWeb: false);
       onError(errorMessage);
     } catch (e) {
       String errorMessage = e.toString();
-      if (errorMessage.contains('recaptcha') || 
-          errorMessage.contains('RECAPTCHA') ||
-          errorMessage.contains('identitytoolkit')) {
-        if (kIsWeb) {
-          errorMessage = 'reCAPTCHA verification failed. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) and try again.';
-        } else {
-          errorMessage = 'Phone verification failed. Please try again.';
-        }
-      } else if (errorMessage.contains('not authorized') || 
-                 errorMessage.contains('unauthorized') ||
-                 errorMessage.contains('package name')) {
+      if (errorMessage.contains('not authorized') || 
+          errorMessage.contains('unauthorized') ||
+          errorMessage.contains('package name')) {
         errorMessage = 'Firebase Authentication authorization error. Please verify:\n1. Package name matches Firebase Console\n2. SHA-1/SHA-256 fingerprints are added in Firebase Console\n3. google-services.json is up to date\n\nContact support if the issue persists.';
+      } else {
+        errorMessage = 'Phone verification failed. Please try again.';
       }
       onError(errorMessage);
     }
@@ -116,12 +88,6 @@ class FirebaseAuthService {
   String _getFriendlyErrorMessage(FirebaseAuthException e, {required bool isWeb}) {
     // Handle specific error codes
     switch (e.code) {
-      case 'missing-recaptcha-token':
-      case 'missing-recaptcha-response':
-        return isWeb 
-          ? 'reCAPTCHA verification required. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) and try again.'
-          : 'Verification failed. Please try again.';
-      
       case 'invalid-phone-number':
         return 'Invalid phone number format. Please enter a valid 10-digit Indian mobile number.';
       
@@ -141,14 +107,27 @@ class FirebaseAuthService {
       case 'missing-app-credential':
         return 'App credentials missing. Please verify Firebase configuration.';
       
+      case 'user-disabled':
+        return 'This account has been disabled. Please contact support.';
+      
+      case 'user-not-found':
+        return 'No account found with this email. Please sign up first.';
+      
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      
+      case 'email-already-in-use':
+        return 'An account already exists with this email. Please sign in instead.';
+      
+      case 'weak-password':
+        return 'Password is too weak. Please use a stronger password.';
+      
+      case 'invalid-email':
+        return 'Invalid email address. Please enter a valid email.';
+      
       default:
         // Check error message for common issues
         final message = e.message ?? e.code;
-        if (message.contains('recaptcha') || message.contains('RECAPTCHA')) {
-          return isWeb 
-            ? 'reCAPTCHA verification failed. Please ensure reCAPTCHA Enterprise is enabled in Firebase Console (Authentication → Settings → reCAPTCHA Enterprise) and try again.'
-            : 'Verification failed. Please try again.';
-        }
         if (message.contains('not authorized') || 
             message.contains('unauthorized') ||
             message.contains('package name') ||
@@ -166,6 +145,11 @@ class FirebaseAuthService {
     required String verificationId,
     required String smsCode,
   }) async {
+    // Block phone authentication on Web
+    if (kIsWeb) {
+      throw Exception('Phone authentication is not available on web. Please use email and password to sign in.');
+    }
+
     try {
       final credential = PhoneAuthProvider.credential(
         verificationId: verificationId,

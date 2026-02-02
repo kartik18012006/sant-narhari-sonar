@@ -17,6 +17,9 @@ class BusinessListScreen extends StatefulWidget {
 
 class _BusinessListScreenState extends State<BusinessListScreen> {
   final _searchController = TextEditingController();
+  final _subcasteOtherController = TextEditingController();
+  final _placeOtherController = TextEditingController();
+  final _businessNatureOtherController = TextEditingController();
   String? _subcaste;
   String? _place;
   String? _businessNature;
@@ -28,6 +31,9 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _subcasteOtherController.dispose();
+    _placeOtherController.dispose();
+    _businessNatureOtherController.dispose();
     super.dispose();
   }
 
@@ -47,17 +53,23 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
       }).toList();
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
+      final subcasteToSearch = (_subcaste!.contains('Other') || _subcaste!.contains('इतर')) && _subcasteOtherController.text.trim().isNotEmpty
+          ? _subcasteOtherController.text.trim()
+          : _subcaste!;
       result = result.where((b) {
         final sc = b['ownerSubcaste'] as String? ?? '';
-        return sc == _subcaste;
+        return sc == subcasteToSearch || sc.toLowerCase().contains(subcasteToSearch.toLowerCase());
       }).toList();
     }
     if (_place != null && _place!.isNotEmpty) {
+      final placeToSearch = (_place!.contains('Other') || _place!.contains('इतर')) && _placeOtherController.text.trim().isNotEmpty
+          ? _placeOtherController.text.trim()
+          : _place!;
       result = result.where((b) {
         final city = (b['businessCityVillage'] as String? ?? '').toLowerCase();
         final district = (b['businessDistrict'] as String? ?? '').toLowerCase();
         final state = (b['businessState'] as String? ?? '').toLowerCase();
-        final placeLower = _place!.toLowerCase();
+        final placeLower = placeToSearch.toLowerCase();
         return city.contains(placeLower) ||
             district.contains(placeLower) ||
             state.contains(placeLower) ||
@@ -67,9 +79,12 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
       }).toList();
     }
     if (_businessNature != null && _businessNature!.isNotEmpty) {
+      final natureToSearch = (_businessNature!.contains('Other') || _businessNature!.contains('इतर')) && _businessNatureOtherController.text.trim().isNotEmpty
+          ? _businessNatureOtherController.text.trim()
+          : _businessNature!;
       result = result.where((b) {
         final n = b['typeOfBusiness'] as String? ?? '';
-        return n == _businessNature;
+        return n == natureToSearch || n.toLowerCase().contains(natureToSearch.toLowerCase());
       }).toList();
     }
     return result;
@@ -125,11 +140,113 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _dropdown('Subcaste / पोटजात', _subcaste, _subcasteOptions, (v) => setState(() => _subcaste = v)),
+                _dropdown('Subcaste / पोटजात', _subcaste, _subcasteOptions, (v) {
+                  setState(() {
+                    _subcaste = v;
+                    if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                      _subcasteOtherController.clear();
+                    }
+                  });
+                }),
+                if (_subcaste != null && (_subcaste!.contains('Other') || _subcaste!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _subcasteOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify subcaste / कृपया पोटजात निर्दिष्ट करा',
+                      hintText: 'Enter subcaste name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
-                _dropdown('Place / स्थान', _place, _placeOptions, (v) => setState(() => _place = v)),
+                _dropdown('Place / स्थान', _place, _placeOptions, (v) {
+                  setState(() {
+                    _place = v;
+                    if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                      _placeOtherController.clear();
+                    }
+                  });
+                }),
+                if (_place != null && (_place!.contains('Other') || _place!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _placeOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify place / कृपया स्थान निर्दिष्ट करा',
+                      hintText: 'Enter place name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
-                _dropdown('Business Nature / व्यवसाय प्रकार', _businessNature, _natureOptions, (v) => setState(() => _businessNature = v)),
+                _dropdown('Business Nature / व्यवसाय प्रकार', _businessNature, _natureOptions, (v) {
+                  setState(() {
+                    _businessNature = v;
+                    if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                      _businessNatureOtherController.clear();
+                    }
+                  });
+                }),
+                if (_businessNature != null && (_businessNature!.contains('Other') || _businessNature!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _businessNatureOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify business nature / कृपया व्यवसाय प्रकार निर्दिष्ट करा',
+                      hintText: 'Enter business nature',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -281,6 +398,9 @@ class _BusinessListScreenState extends State<BusinessListScreen> {
       _place = null;
       _businessNature = null;
       _searchController.clear();
+      _subcasteOtherController.clear();
+      _placeOtherController.clear();
+      _businessNatureOtherController.clear();
     });
   }
 

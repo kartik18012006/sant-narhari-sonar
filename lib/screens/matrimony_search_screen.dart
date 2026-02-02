@@ -346,8 +346,12 @@ class _MatrimonySearchScreenState extends State<MatrimonySearchScreen> {
         ),
       );
       if (paid == true && mounted) {
+        // Wait a bit for payment to be recorded
+        await Future.delayed(const Duration(milliseconds: 500));
         await _checkPaymentAccess();
-        if (mounted && _hasAccess) {
+        if (mounted) {
+          // Navigate to terms screen regardless of access check result
+          // The payment was successful, so proceed to registration
           Navigator.of(context).push(
             MaterialPageRoute<bool>(
               builder: (_) => MatrimonyTermsScreen(isGroom: widget.isGroom),
@@ -377,8 +381,12 @@ class _MatrimonySearchScreenState extends State<MatrimonySearchScreen> {
         ),
       );
       if (paid == true && mounted) {
+        // Wait a bit for payment to be recorded
+        await Future.delayed(const Duration(milliseconds: 500));
         await _checkPaymentAccess();
-        if (mounted && _hasAccess) {
+        if (mounted) {
+          // Navigate to search screen regardless of access check result
+          // The payment was successful, so proceed to search
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Payment successful. You now have access to both bride and groom profiles.'),

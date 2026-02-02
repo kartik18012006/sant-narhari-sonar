@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
@@ -58,35 +59,37 @@ class LoginSignupScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              // Continue with Phone
-              _AuthOptionCard(
-                icon: Icons.phone_android,
-                iconBgColor: AppTheme.phoneIconBg,
-                iconColor: AppTheme.phoneIcon,
-                title: 'Continue with Phone',
-                subtitle: "We'll send you an OTP via SMS",
-                onTap: () => _onContinueWithPhone(context),
-              ),
-              const SizedBox(height: 20),
-              // OR
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade600,
+              // Continue with Phone (Hidden on Web)
+              if (!kIsWeb) ...[
+                _AuthOptionCard(
+                  icon: Icons.phone_android,
+                  iconBgColor: AppTheme.phoneIconBg,
+                  iconColor: AppTheme.phoneIcon,
+                  title: 'Continue with Phone',
+                  subtitle: "We'll send you an OTP via SMS",
+                  onTap: () => _onContinueWithPhone(context),
+                ),
+                const SizedBox(height: 20),
+                // OR
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                ],
-              ),
-              const SizedBox(height: 20),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
               // Continue with Email
               _AuthOptionCard(
                 icon: Icons.email_outlined,

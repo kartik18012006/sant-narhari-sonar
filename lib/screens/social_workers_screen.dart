@@ -14,6 +14,8 @@ class SocialWorkersScreen extends StatefulWidget {
 
 class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
   final _searchController = TextEditingController();
+  final _placeOtherController = TextEditingController();
+  final _subcasteOtherController = TextEditingController();
   String? _place;
   String? _subcaste;
 
@@ -24,6 +26,8 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _placeOtherController.dispose();
+    _subcasteOtherController.dispose();
     super.dispose();
   }
 
@@ -47,6 +51,9 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
       }).toList();
     }
     if (_place != null && _place!.isNotEmpty) {
+      final placeToSearch = (_place!.contains('Other') || _place!.contains('इतर')) && _placeOtherController.text.trim().isNotEmpty
+          ? _placeOtherController.text.trim()
+          : _place!;
       result = result.where((s) {
         final permanentCity = (s['permanentVillageCity'] as String? ?? '').toLowerCase();
         final permanentDistrict = (s['permanentDistrict'] as String? ?? '').toLowerCase();
@@ -54,7 +61,7 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
         final currentCity = (s['currentVillageCity'] as String? ?? '').toLowerCase();
         final currentDistrict = (s['currentDistrict'] as String? ?? '').toLowerCase();
         final currentState = (s['currentState'] as String? ?? '').toLowerCase();
-        final placeLower = _place!.toLowerCase();
+        final placeLower = placeToSearch.toLowerCase();
         return permanentCity.contains(placeLower) ||
             permanentDistrict.contains(placeLower) ||
             permanentState.contains(placeLower) ||
@@ -70,9 +77,12 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
       }).toList();
     }
     if (_subcaste != null && _subcaste!.isNotEmpty) {
+      final subcasteToSearch = (_subcaste!.contains('Other') || _subcaste!.contains('इतर')) && _subcasteOtherController.text.trim().isNotEmpty
+          ? _subcasteOtherController.text.trim()
+          : _subcaste!;
       result = result.where((s) {
         final sc = s['subcaste'] as String? ?? '';
-        return sc == _subcaste;
+        return sc == subcasteToSearch || sc.toLowerCase().contains(subcasteToSearch.toLowerCase());
       }).toList();
     }
     return result;
@@ -162,16 +172,84 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
                   value: _place,
                   hint: 'Select city or district',
                   items: _placeOptions,
-                  onChanged: (v) => setState(() => _place = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _place = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _placeOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_place != null && (_place!.contains('Other') || _place!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _placeOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify place / कृपया स्थान निर्दिष्ट करा',
+                      hintText: 'Enter place name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _dropdown(
                   label: 'Subcaste / पोटजात',
                   value: _subcaste,
                   hint: 'Select subcaste',
                   items: _subcasteOptions,
-                  onChanged: (v) => setState(() => _subcaste = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _subcaste = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _subcasteOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_subcaste != null && (_subcaste!.contains('Other') || _subcaste!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _subcasteOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify subcaste / कृपया पोटजात निर्दिष्ट करा',
+                      hintText: 'Enter subcaste name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -347,6 +425,8 @@ class _SocialWorkersScreenState extends State<SocialWorkersScreen> {
       _place = null;
       _subcaste = null;
       _searchController.clear();
+      _placeOtherController.clear();
+      _subcasteOtherController.clear();
     });
   }
 }

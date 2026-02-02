@@ -13,6 +13,8 @@ class FamilyDirectoryListScreen extends StatefulWidget {
 
 class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
   final _searchController = TextEditingController();
+  final _villageOtherController = TextEditingController();
+  final _relationOtherController = TextEditingController();
   String? _village;
   String? _relation;
 
@@ -22,6 +24,8 @@ class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _villageOtherController.dispose();
+    _relationOtherController.dispose();
     super.dispose();
   }
 
@@ -41,15 +45,21 @@ class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
       }).toList();
     }
     if (_village != null && _village!.isNotEmpty) {
+      final villageToSearch = (_village!.contains('Other') || _village!.contains('इतर')) && _villageOtherController.text.trim().isNotEmpty
+          ? _villageOtherController.text.trim()
+          : _village!;
       result = result.where((m) {
         final v = m['village'] as String? ?? '';
-        return v == _village || v.toLowerCase().contains(_village!.toLowerCase());
+        return v == villageToSearch || v.toLowerCase().contains(villageToSearch.toLowerCase());
       }).toList();
     }
     if (_relation != null && _relation!.isNotEmpty) {
+      final relationToSearch = (_relation!.contains('Other') || _relation!.contains('इतर')) && _relationOtherController.text.trim().isNotEmpty
+          ? _relationOtherController.text.trim()
+          : _relation!;
       result = result.where((m) {
         final r = m['relation'] as String? ?? '';
-        return r == _relation;
+        return r == relationToSearch || r.toLowerCase().contains(relationToSearch.toLowerCase());
       }).toList();
     }
     return result;
@@ -116,16 +126,84 @@ class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
                   value: _village,
                   hint: 'Select village or city',
                   items: _villageOptions,
-                  onChanged: (v) => setState(() => _village = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _village = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _villageOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_village != null && (_village!.contains('Other') || _village!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _villageOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify village/city / कृपया गाव/शहर निर्दिष्ट करा',
+                      hintText: 'Enter village or city name',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _dropdown(
                   label: 'Relation / नाते',
                   value: _relation,
                   hint: 'Select relation',
                   items: _relationOptions,
-                  onChanged: (v) => setState(() => _relation = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _relation = v;
+                      if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                        _relationOtherController.clear();
+                      }
+                    });
+                  },
                 ),
+                if (_relation != null && (_relation!.contains('Other') || _relation!.contains('इतर'))) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _relationOtherController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Please specify relation / कृपया नाते निर्दिष्ट करा',
+                      hintText: 'Enter relation',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -233,10 +311,12 @@ class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
           _clearFilters();
           Navigator.of(ctx).pop();
         },
-        onApply: (village, relation) {
+        onApply: (village, relation, villageOther, relationOther) {
           setState(() {
             _village = village;
             _relation = relation;
+            if (villageOther != null) _villageOtherController.text = villageOther;
+            if (relationOther != null) _relationOtherController.text = relationOther;
           });
           Navigator.of(ctx).pop();
         },
@@ -285,6 +365,8 @@ class _FamilyDirectoryListScreenState extends State<FamilyDirectoryListScreen> {
       _village = null;
       _relation = null;
       _searchController.clear();
+      _villageOtherController.clear();
+      _relationOtherController.clear();
     });
   }
 }
@@ -304,7 +386,7 @@ class _FamilyFilterSheet extends StatefulWidget {
   final List<String> villageOptions;
   final List<String> relationOptions;
   final VoidCallback onClear;
-  final void Function(String? village, String? relation) onApply;
+  final void Function(String? village, String? relation, String? villageOther, String? relationOther) onApply;
 
   @override
   State<_FamilyFilterSheet> createState() => _FamilyFilterSheetState();
@@ -313,12 +395,21 @@ class _FamilyFilterSheet extends StatefulWidget {
 class _FamilyFilterSheetState extends State<_FamilyFilterSheet> {
   late String? _village;
   late String? _relation;
+  final _villageOtherController = TextEditingController();
+  final _relationOtherController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _village = widget.initialVillage;
     _relation = widget.initialRelation;
+  }
+
+  @override
+  void dispose() {
+    _villageOtherController.dispose();
+    _relationOtherController.dispose();
+    super.dispose();
   }
 
   @override
@@ -334,9 +425,73 @@ class _FamilyFilterSheetState extends State<_FamilyFilterSheet> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
           ),
           const SizedBox(height: 16),
-          _buildDropdown('Village / City', _village, widget.villageOptions, (v) => setState(() => _village = v)),
+          _buildDropdown('Village / City', _village, widget.villageOptions, (v) {
+            setState(() {
+              _village = v;
+              if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                _villageOtherController.clear();
+              }
+            });
+          }),
+          if (_village != null && (_village!.contains('Other') || _village!.contains('इतर'))) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _villageOtherController,
+              decoration: InputDecoration(
+                labelText: 'Please specify village/city / कृपया गाव/शहर निर्दिष्ट करा',
+                hintText: 'Enter village or city name',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
-          _buildDropdown('Relation', _relation, widget.relationOptions, (v) => setState(() => _relation = v)),
+          _buildDropdown('Relation', _relation, widget.relationOptions, (v) {
+            setState(() {
+              _relation = v;
+              if (v == null || !(v.contains('Other') || v.contains('इतर'))) {
+                _relationOtherController.clear();
+              }
+            });
+          }),
+          if (_relation != null && (_relation!.contains('Other') || _relation!.contains('इतर'))) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _relationOtherController,
+              decoration: InputDecoration(
+                labelText: 'Please specify relation / कृपया नाते निर्दिष्ट करा',
+                hintText: 'Enter relation',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
+                  borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [
@@ -354,7 +509,12 @@ class _FamilyFilterSheetState extends State<_FamilyFilterSheet> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => widget.onApply(_village, _relation),
+                  onPressed: () => widget.onApply(
+                    _village,
+                    _relation,
+                    _villageOtherController.text.trim().isEmpty ? null : _villageOtherController.text.trim(),
+                    _relationOtherController.text.trim().isEmpty ? null : _relationOtherController.text.trim(),
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.gold,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusButton)),

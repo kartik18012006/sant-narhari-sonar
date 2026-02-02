@@ -28,8 +28,11 @@ class AppTheme {
   static const double radiusCard = 16.0;
   static const double radiusInput = 12.0;
 
-  // Button height
-  static const double buttonHeight = 52.0;
+  // Button height (reduced for better visual balance)
+  static const double buttonHeight = 40.0;
+  
+  // Max button width to prevent excessive stretching
+  static const double maxButtonWidth = 400.0;
 
   /// Marital Status (वैवाहिक स्थिती) — 3 options, English + Marathi. Same for bride & groom forms.
   static const List<String> maritalStatusOptions = [
@@ -230,6 +233,47 @@ class AppTheme {
         elevation: 0,
         foregroundColor: Colors.black87,
         iconTheme: IconThemeData(color: Colors.black87),
+      ),
+      // Button themes - reduced padding and height, auto-width by default
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          minimumSize: const Size(0, buttonHeight),
+          maximumSize: Size(maxButtonWidth, buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusButton),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          minimumSize: const Size(0, buttonHeight),
+          maximumSize: Size(maxButtonWidth, buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusButton),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          minimumSize: const Size(0, 36),
+          maximumSize: Size(maxButtonWidth, 36),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusButton),
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          minimumSize: const Size(0, buttonHeight),
+          maximumSize: Size(maxButtonWidth, buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusButton),
+          ),
+        ),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import '../payment_config.dart';
 import 'family_directory_list_screen.dart';
-import 'family_directory_registration_screen.dart';
 import 'family_directory_terms_screen.dart';
 import 'payment_screen.dart';
 
@@ -134,37 +133,43 @@ class FamilyDirectoryScreen extends StatelessWidget {
     );
   }
 
-  void _onRegisterFamily(BuildContext context) {
+  void _onRegisterFamily(BuildContext context) async {
     // APK: Pay first, then open registration form. Same flow as Explore Business.
-    Navigator.of(context).push(
+    final paid = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => PaymentScreen(
           featureId: PaymentConfig.familyDirectory,
           amount: PaymentConfig.familyDirectoryAmount,
         ),
       ),
-    ).then((paid) {
-      if (paid == true && context.mounted) {
+    );
+    if (paid == true && context.mounted) {
+      // Wait a bit for payment to be recorded
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute<bool>(
             builder: (_) => const FamilyDirectoryTermsScreen(),
           ),
         );
       }
-    });
+    }
   }
 
-  void _onSearch(BuildContext context) {
+  void _onSearch(BuildContext context) async {
     // APK: Pay first, then search. Same flow.
-    Navigator.of(context).push(
+    final paid = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => PaymentScreen(
           featureId: PaymentConfig.familyDirectory,
           amount: PaymentConfig.familyDirectoryAmount,
         ),
       ),
-    ).then((paid) {
-      if (paid == true && context.mounted) {
+    );
+    if (paid == true && context.mounted) {
+      // Wait a bit for payment to be recorded
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Payment successful. You can now search the family directory.'),
@@ -175,19 +180,22 @@ class FamilyDirectoryScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const FamilyDirectoryListScreen()),
         );
       }
-    });
+    }
   }
 
-  void _onPayNow(BuildContext context) {
-    Navigator.of(context).push(
+  void _onPayNow(BuildContext context) async {
+    final paid = await Navigator.of(context).push<bool>(
       MaterialPageRoute<bool>(
         builder: (_) => PaymentScreen(
           featureId: PaymentConfig.familyDirectory,
           amount: PaymentConfig.familyDirectoryAmount,
         ),
       ),
-    ).then((paid) {
-      if (paid == true && context.mounted) {
+    );
+    if (paid == true && context.mounted) {
+      // Wait a bit for payment to be recorded
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Payment successful. You can now register family and search directory.'),
@@ -195,6 +203,6 @@ class FamilyDirectoryScreen extends StatelessWidget {
           ),
         );
       }
-    });
+    }
   }
 }

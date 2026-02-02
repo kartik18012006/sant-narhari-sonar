@@ -84,14 +84,21 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
   bool _uploadingOwnersAadhaar = false;
   bool _uploadingOwnersPanCard = false;
   
-  // Other business documents (keep as checkboxes for now)
-  bool _hasBusinessPan = false;
-  bool _hasGstCertificate = false;
-  bool _hasUdyamCertificate = false;
-  bool _hasShopActLicense = false;
-  bool _hasIec = false;
-  bool _hasBusinessAddressProof = false;
-  bool _hasSignature = false;
+  // Other business documents (image uploads)
+  String? _businessPanImageUrl;
+  String? _gstCertificateImageUrl;
+  String? _udyamCertificateImageUrl;
+  String? _shopActLicenseImageUrl;
+  String? _iecImageUrl;
+  String? _businessAddressProofImageUrl;
+  String? _signatureImageUrl;
+  bool _uploadingBusinessPan = false;
+  bool _uploadingGstCertificate = false;
+  bool _uploadingUdyamCertificate = false;
+  bool _uploadingShopActLicense = false;
+  bool _uploadingIec = false;
+  bool _uploadingBusinessAddressProof = false;
+  bool _uploadingSignature = false;
 
   bool _loading = false;
 
@@ -271,13 +278,13 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
         documents: {
           'ownersAadhaar': _ownersAadhaarImageUrl,
           'ownersPanCard': _ownersPanCardImageUrl,
-          'businessPan': _hasBusinessPan ? 'true' : null,
-          'gstCertificate': _hasGstCertificate ? 'true' : null,
-          'udyamCertificate': _hasUdyamCertificate ? 'true' : null,
-          'shopActLicense': _hasShopActLicense ? 'true' : null,
-          'iec': _hasIec ? 'true' : null,
-          'businessAddressProof': _hasBusinessAddressProof ? 'true' : null,
-          'signature': _hasSignature ? 'true' : null,
+          'businessPan': _businessPanImageUrl,
+          'gstCertificate': _gstCertificateImageUrl,
+          'udyamCertificate': _udyamCertificateImageUrl,
+          'shopActLicense': _shopActLicenseImageUrl,
+          'iec': _iecImageUrl,
+          'businessAddressProof': _businessAddressProofImageUrl,
+          'signature': _signatureImageUrl,
         },
         createdBy: createdBy,
       );
@@ -670,71 +677,117 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                 });
               },
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'Business PAN / व्यवसाय पॅन',
-                    value: _hasBusinessPan,
-                    onChanged: (v) => setState(() => _hasBusinessPan = v ?? false),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'GST Certificate / जीएसटी प्रमाणपत्र',
-                    value: _hasGstCertificate,
-                    onChanged: (v) => setState(() => _hasGstCertificate = v ?? false),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'Business PAN / व्यवसाय पॅन',
+              imageUrl: _businessPanImageUrl,
+              uploading: _uploadingBusinessPan,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingBusinessPan = true);
+                final url = await _uploadDocument('business_pan');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingBusinessPan = false;
+                  if (url != null) _businessPanImageUrl = url;
+                });
+              },
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'Udyam / MSME Certificate / उद्यम / एमएसएमई प्रमाणपत्र',
-                    value: _hasUdyamCertificate,
-                    onChanged: (v) => setState(() => _hasUdyamCertificate = v ?? false),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'Shop Act License / दुकान कायदा परवाना',
-                    value: _hasShopActLicense,
-                    onChanged: (v) => setState(() => _hasShopActLicense = v ?? false),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'GST Certificate / जीएसटी प्रमाणपत्र',
+              imageUrl: _gstCertificateImageUrl,
+              uploading: _uploadingGstCertificate,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingGstCertificate = true);
+                final url = await _uploadDocument('gst_certificate');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingGstCertificate = false;
+                  if (url != null) _gstCertificateImageUrl = url;
+                });
+              },
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'Import Export Code (IEC) / आयात निर्यात कोड',
-                    value: _hasIec,
-                    onChanged: (v) => setState(() => _hasIec = v ?? false),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildCheckbox(
-                    label: 'Business Address Proof / व्यवसाय पत्त्याचा पुरावा',
-                    value: _hasBusinessAddressProof,
-                    onChanged: (v) => setState(() => _hasBusinessAddressProof = v ?? false),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'Udyam / MSME Certificate / उद्यम / एमएसएमई प्रमाणपत्र',
+              imageUrl: _udyamCertificateImageUrl,
+              uploading: _uploadingUdyamCertificate,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingUdyamCertificate = true);
+                final url = await _uploadDocument('udyam_certificate');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingUdyamCertificate = false;
+                  if (url != null) _udyamCertificateImageUrl = url;
+                });
+              },
             ),
-            const SizedBox(height: 12),
-            _buildCheckbox(
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'Shop Act License / दुकान कायदा परवाना',
+              imageUrl: _shopActLicenseImageUrl,
+              uploading: _uploadingShopActLicense,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingShopActLicense = true);
+                final url = await _uploadDocument('shop_act_license');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingShopActLicense = false;
+                  if (url != null) _shopActLicenseImageUrl = url;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'Import Export Code (IEC) / आयात निर्यात कोड',
+              imageUrl: _iecImageUrl,
+              uploading: _uploadingIec,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingIec = true);
+                final url = await _uploadDocument('iec');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingIec = false;
+                  if (url != null) _iecImageUrl = url;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
+              label: 'Business Address Proof / व्यवसाय पत्त्याचा पुरावा',
+              imageUrl: _businessAddressProofImageUrl,
+              uploading: _uploadingBusinessAddressProof,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingBusinessAddressProof = true);
+                final url = await _uploadDocument('business_address_proof');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingBusinessAddressProof = false;
+                  if (url != null) _businessAddressProofImageUrl = url;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildDocumentUpload(
               label: 'Signature / Digital Signature / सही / डिजिटल स्वाक्षरी',
-              value: _hasSignature,
-              onChanged: (v) => setState(() => _hasSignature = v ?? false),
+              imageUrl: _signatureImageUrl,
+              uploading: _uploadingSignature,
+              required: false,
+              onTap: () async {
+                setState(() => _uploadingSignature = true);
+                final url = await _uploadDocument('signature');
+                if (!mounted) return;
+                setState(() {
+                  _uploadingSignature = false;
+                  if (url != null) _signatureImageUrl = url;
+                });
+              },
             ),
             const SizedBox(height: 32),
 
@@ -1444,7 +1497,14 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
                               onTap: () {
                                 setState(() {
                                   if (label.contains('Aadhaar')) _ownersAadhaarImageUrl = null;
-                                  else if (label.contains('PAN')) _ownersPanCardImageUrl = null;
+                                  else if (label.contains('PAN') && label.contains('Owner')) _ownersPanCardImageUrl = null;
+                                  else if (label.contains('Business PAN')) _businessPanImageUrl = null;
+                                  else if (label.contains('GST')) _gstCertificateImageUrl = null;
+                                  else if (label.contains('Udyam') || label.contains('MSME')) _udyamCertificateImageUrl = null;
+                                  else if (label.contains('Shop Act')) _shopActLicenseImageUrl = null;
+                                  else if (label.contains('IEC') || label.contains('Import Export')) _iecImageUrl = null;
+                                  else if (label.contains('Address Proof')) _businessAddressProofImageUrl = null;
+                                  else if (label.contains('Signature')) _signatureImageUrl = null;
                                 });
                               },
                               child: Container(
@@ -1491,27 +1551,6 @@ class _BusinessRegistrationScreenState extends State<BusinessRegistrationScreen>
     );
   }
 
-  Widget _buildCheckbox({
-    required String label,
-    required bool value,
-    required ValueChanged<bool?> onChanged,
-  }) {
-    return Row(
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: onChanged,
-          activeColor: AppTheme.gold,
-        ),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _circularPhotoPlaceholder() {
     return Column(
