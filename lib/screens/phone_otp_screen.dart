@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -35,6 +35,57 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return Scaffold(
+        backgroundColor: AppTheme.onboardingBackground,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.phone_disabled, size: 64, color: Colors.grey.shade400),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Phone Authentication Not Available',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Phone OTP authentication is not available on web. Please use email and password to sign in.',
+                    style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.gold,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: AppTheme.onboardingBackground,
       appBar: AppBar(
@@ -333,54 +384,63 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   }
 
   Future<void> _onSendOtp() async {
-  final number = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
-
-  if (number.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(number)) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Please enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone authentication is not available on web. Please use email and password.'),
         ),
-      ),
-    );
-    return;
-  }
+      );
+      return;
+    }
 
-  setState(() => _loading = true);
+    final number = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
 
-  try {
-    await FirebaseAuthService.instance.sendPhoneOtp(
-      phoneNumber: '+91$number',
-      onCodeSent: (verificationId) {
-        if (!mounted) return;
-        setState(() {
-          _verificationId = verificationId;
-          _otpSent = true;
-          _loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP sent. Check your SMS.'),
-            backgroundColor: Colors.green,
+    if (number.length != 10 || !RegExp(r'^[6-9]\d{9}$').hasMatch(number)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
           ),
-        );
-      },
-      onError: (message) {
-        if (!mounted) return;
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_friendlyPhoneError(message))),
-        );
-      },
-    );
-  } catch (e) {
-    if (!mounted) return;
-    setState(() => _loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_friendlyPhoneError(e.toString()))),
-    );
+        ),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      await FirebaseAuthService.instance.sendPhoneOtp(
+        phoneNumber: '+91$number',
+        onCodeSent: (verificationId) {
+          if (!mounted) return;
+          setState(() {
+            _verificationId = verificationId;
+            _otpSent = true;
+            _loading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OTP sent. Check your SMS.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+        onError: (message) {
+          if (!mounted) return;
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(_friendlyPhoneError(message))),
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_friendlyPhoneError(e.toString()))),
+      );
+    }
   }
-}
   String _friendlyPhoneError(String message) {
     // Handle authorization errors (most critical)
     if (message.contains('not authorized') || 
@@ -391,14 +451,6 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
       return 'Firebase Authentication authorization error.\n\nPlease verify:\n• Package name matches Firebase Console\n• SHA-1/SHA-256 fingerprints are added\n• google-services.json is up to date\n\nContact support if the issue persists.';
     }
     
-    // Handle reCAPTCHA errors (especially for web)
-    if (message.contains('recaptcha') || 
-        message.contains('RECAPTCHA') ||
-        message.contains('identitytoolkit') ||
-        message.contains('reCAPTCHA') ||
-        message.contains('missing-recaptcha')) {
-      return 'reCAPTCHA verification failed.\n\nFor web: Ensure reCAPTCHA Enterprise is enabled in Firebase Console:\nAuthentication → Settings → reCAPTCHA Enterprise\n\nThen try again.';
-    }
     
     // Handle other common errors
     if (message.contains('invalid-phone-number') || message.contains('Invalid')) {
@@ -428,6 +480,15 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
   }
 
   Future<void> _onVerifyOtp() async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone authentication is not available on web. Please use email and password.'),
+        ),
+      );
+      return;
+    }
+
     final code = _otpController.text.trim();
     if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(

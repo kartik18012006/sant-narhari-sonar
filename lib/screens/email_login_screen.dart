@@ -140,28 +140,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
-              if (!_isSignUp) ...[
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _loading ? null : _onForgotPassword,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.emailIcon,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -235,44 +213,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     );
   }
 
-  Future<void> _onForgotPassword() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first')),
-      );
-      return;
-    }
-    setState(() => _loading = true);
-    try {
-      await FirebaseAuthService.instance.sendPasswordResetEmail(email);
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset email sent. Check your inbox (and spam folder).'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        final msg = e.code == 'user-not-found'
-            ? 'No account found with this email. Sign up first.'
-            : (e.message ?? e.code);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().length > 60 ? e.toString().substring(0, 60) + '...' : e.toString())),
-        );
-      }
-    }
-  }
 
   Future<void> _onSubmit() async {
     final email = _emailController.text.trim();
@@ -304,30 +244,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
             email: user.email,
             displayName: user.displayName ?? email.split('@').first,
           );
-          try {
-            await FirebaseAuthService.instance.sendEmailVerification();
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Verification email sent. Please check your inbox (and spam) and verify your email.'),
-                  backgroundColor: Colors.green,
-                  duration: Duration(seconds: 5),
-                ),
-              );
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    e.toString().contains('too-many-requests')
-                        ? 'Verification email limit reached. You can resend from Profile after signing in.'
-                        : 'Verification email could not be sent. You can resend from Profile after signing in.',
-                  ),
-                ),
-              );
-            }
-          }
           if (!mounted) return;
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const MainShellScreen()),

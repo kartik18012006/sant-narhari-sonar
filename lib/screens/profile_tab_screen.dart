@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
@@ -50,7 +49,6 @@ class _ProfileTabScreenState extends State<ProfileTabScreen> {
       return;
     }
     try {
-      await FirebaseAuthService.instance.reloadUser();
       final freshUser = FirebaseAuthService.instance.currentUser;
       if (freshUser == null) {
         if (mounted) setState(() => _loading = false);
@@ -140,13 +138,6 @@ class _ProfileTabScreenState extends State<ProfileTabScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                ],
-                if (user != null &&
-                    user.providerData.any((p) => p.providerId == 'password') &&
-                    (user.email ?? '').isNotEmpty &&
-                    !user.emailVerified) ...[
-                  _EmailVerificationBanner(onResend: _loadProfile),
                   const SizedBox(height: 16),
                 ],
                 // User info card (from Firebase)
@@ -453,114 +444,3 @@ class _ProfileTile extends StatelessWidget {
   }
 }
 
-/// Banner shown when user signed in with email but email is not verified. Offers "Resend verification email".
-class _EmailVerificationBanner extends StatefulWidget {
-  const _EmailVerificationBanner({required this.onResend});
-
-  final VoidCallback? onResend;
-
-  @override
-  State<_EmailVerificationBanner> createState() => _EmailVerificationBannerState();
-}
-
-class _EmailVerificationBannerState extends State<_EmailVerificationBanner> {
-  bool _sending = false;
-
-  Future<void> _resend() async {
-    if (_sending) return;
-    setState(() => _sending = true);
-    try {
-      await FirebaseAuthService.instance.sendEmailVerification();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification email sent. Please check your inbox (and spam folder).'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-        widget.onResend?.call();
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        String errorMessage = 'Failed to send verification email.';
-        if (e.code == 'too-many-requests') {
-          errorMessage = 'Too many requests. Please wait a few minutes before requesting another verification email.';
-        } else if (e.code == 'user-not-found') {
-          errorMessage = 'User not found. Please sign in again.';
-        } else if (e.message != null) {
-          errorMessage = e.message!;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        String errorMessage = 'Failed to send verification email. Please try again later.';
-        if (e.toString().contains('already verified')) {
-          errorMessage = 'Email is already verified.';
-        } else if (e.toString().contains('email')) {
-          errorMessage = e.toString();
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _sending = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.mark_email_unread_outlined, color: Colors.blue.shade700, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Verify your email to secure your account.',
-                  style: TextStyle(fontSize: 13, color: Colors.blue.shade900),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton.icon(
-              onPressed: _sending ? null : _resend,
-              icon: _sending
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Icon(Icons.email_outlined, size: 18, color: Colors.blue.shade700),
-              label: Text(
-                _sending ? 'Sending...' : 'Resend verification email',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
