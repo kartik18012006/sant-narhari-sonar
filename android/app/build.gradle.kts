@@ -85,7 +85,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     // Google Play Services - Required for Firebase
     implementation("com.google.android.gms:play-services-base:18.2.0")
-    // reCAPTCHA fallback for Phone Auth (e.g. on emulator)
     implementation("androidx.browser:browser:1.8.0")
     // Multidex support for Firebase
     implementation("androidx.multidex:multidex:2.0.1")

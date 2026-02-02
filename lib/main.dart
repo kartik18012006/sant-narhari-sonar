@@ -11,6 +11,7 @@ import 'screens/subscription_required_screen.dart';
 import 'services/firebase_auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/language_service.dart';
+import 'services/msg91_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,10 @@ void main() async {
   
   // Load saved language (English / Marathi) from SharedPreferences
   await LanguageService.instance.loadSavedLanguage();
+  
+  // Initialize MSG91 widget once at app start
+  Msg91Service.instance.initWidget();
+  
   runApp(const SantNarhariSonarApp());
 }
 

@@ -16,5 +16,6 @@ class DefaultFirebaseOptions {
     projectId: 'sant-narhari-sonar',
     authDomain: 'sant-narhari-sonar.firebaseapp.com',
     storageBucket: 'sant-narhari-sonar.firebasestorage.app',
+    measurementId: 'G-E5Y9SH2GRN',
   );
 }

@@ -21,6 +21,7 @@ dependencies:
   razorpay_flutter: ^1.4.0
   http: ^1.2.0
   intl: ^0.20.2
+  sendotp_flutter_sdk: ^0.0.2
 
 dev_dependencies:
   flutter_test:
