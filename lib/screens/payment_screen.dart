@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 // Web: stub (UPI/Card not supported); mobile: real Razorpay
 import 'payment_razorpay_stub.dart' if (dart.library.io) 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../services/razorpay_web_service_stub.dart' if (dart.library.html) '../services/razorpay_web_service.dart';
 
 import '../app_theme.dart';
 import '../payment_config.dart';
@@ -31,8 +32,8 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  // Web: only "Other" payment; mobile: upi | card | other
-  String _selectedMethod = kIsWeb ? 'other' : 'upi';
+  // Web and mobile: upi | card | other
+  String _selectedMethod = 'upi';
   PaymentGatewayConfig? _gatewayConfig;
   bool _configLoading = true;
   String? _configError;
@@ -143,7 +144,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         setState(() {
           _gatewayConfig = config;
           _configLoading = false;
-          _configError = config == null ? 'Payment config not found in Firestore (payment collection). Add a doc with key_id and mode.' : null;
+          _configError = config == null ? 'Payment gateway configuration not available. Please contact support.' : null;
         });
       }
     } catch (e) {
@@ -306,26 +307,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (!kIsWeb) ...[
-                _PaymentOption(
-                  value: 'upi',
-                  label: 'UPI (GPay, PhonePe, Paytm)',
-                  subtitle: 'Pay using UPI ID or linked bank',
-                  icon: Icons.phone_android,
-                  isSelected: _selectedMethod == 'upi',
-                  onTap: () => setState(() => _selectedMethod = 'upi'),
-                ),
-                const SizedBox(height: 10),
-                _PaymentOption(
-                  value: 'card',
-                  label: 'Card / Net Banking',
-                  subtitle: 'Credit, Debit or Net Banking',
-                  icon: Icons.credit_card,
-                  isSelected: _selectedMethod == 'card',
-                  onTap: () => setState(() => _selectedMethod = 'card'),
-                ),
-                const SizedBox(height: 10),
-              ],
+              _PaymentOption(
+                value: 'upi',
+                label: 'UPI (GPay, PhonePe, Paytm)',
+                subtitle: 'Pay using UPI ID or linked bank',
+                icon: Icons.phone_android,
+                isSelected: _selectedMethod == 'upi',
+                onTap: () => setState(() => _selectedMethod = 'upi'),
+              ),
+              const SizedBox(height: 10),
+              _PaymentOption(
+                value: 'card',
+                label: 'Card / Net Banking',
+                subtitle: 'Credit, Debit or Net Banking',
+                icon: Icons.credit_card,
+                isSelected: _selectedMethod == 'card',
+                onTap: () => setState(() => _selectedMethod = 'card'),
+              ),
+              const SizedBox(height: 10),
               _PaymentOption(
                 value: 'other',
                 label: 'Other',
@@ -447,20 +446,61 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
 
     final user = FirebaseAuthService.instance.currentUser;
-    final options = {
-      'key': config.keyId,
-      'amount': amountPaise,
-      'order_id': orderId,
-      'name': 'Sant Narhari Sonar',
-      'description': PaymentConfig.titleFor(widget.featureId),
-      'prefill': {
-        if (user?.phoneNumber != null) 'contact': user!.phoneNumber!.replaceAll(RegExp(r'\D'), ''),
-        if (user?.email != null) 'email': user!.email,
-      },
-    };
+    
+    if (kIsWeb) {
+      // Web: Use Razorpay Web Checkout
+      _checkoutOpen = true;
+      final result = await RazorpayWebService.instance.openCheckout(
+        keyId: config.keyId,
+        amount: amountPaise,
+        orderId: orderId,
+        name: 'Sant Narhari Sonar',
+        description: PaymentConfig.titleFor(widget.featureId),
+        prefill: {
+          if (user?.phoneNumber != null) 'contact': user!.phoneNumber!.replaceAll(RegExp(r'\D'), ''),
+          if (user?.email != null) 'email': user!.email,
+        },
+        onSuccess: (response) {
+          _checkoutOpen = false;
+          if (!mounted) return;
+          _handlePaymentSuccess(PaymentSuccessResponse(
+            paymentId: response['razorpay_payment_id'] as String?,
+            orderId: response['razorpay_order_id'] as String?,
+          ));
+        },
+        onError: (error) {
+          _checkoutOpen = false;
+          if (!mounted) return;
+          _handlePaymentError(PaymentFailureResponse(
+            message: error['message'] as String? ?? 'Payment failed',
+            code: error['code'] as String?,
+          ));
+        },
+      );
+      
+      if (!result['success'] && mounted) {
+        _checkoutOpen = false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] as String? ?? 'Failed to open payment checkout')),
+        );
+      }
+    } else {
+      // Mobile: Use Razorpay Flutter SDK
+      final options = {
+        'key': config.keyId,
+        'amount': amountPaise,
+        'order_id': orderId,
+        'name': 'Sant Narhari Sonar',
+        'description': PaymentConfig.titleFor(widget.featureId),
+        'prefill': {
+          if (user?.phoneNumber != null) 'contact': user!.phoneNumber!.replaceAll(RegExp(r'\D'), ''),
+          if (user?.email != null) 'email': user!.email,
+        },
+      };
 
-    _checkoutOpen = true;
-    _razorpay.open(options);
+      _checkoutOpen = true;
+      _razorpay.open(options);
+    }
   }
 }
 

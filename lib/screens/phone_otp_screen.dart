@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_theme.dart';
+import '../payment_config.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/firestore_service.dart';
 import '../services/msg91_service.dart';
 import 'main_shell_screen.dart';
+import 'payment_screen.dart';
 
 /// Screen shown when user taps "Continue with Phone" — enter phone, Send OTP, then enter OTP and verify.
 class PhoneOtpScreen extends StatefulWidget {
@@ -76,19 +78,6 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
             }
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: _loading ? null : _onSkip,
-            child: Text(
-              'Skip',
-              style: TextStyle(
-                color: _loading ? Colors.grey : AppTheme.goldDark,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -379,14 +368,6 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
     );
   }
 
-  void _onSkip() {
-    // Skip: go to main app (next), not back to first screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
-      (route) => false,
-    );
-  }
-
   Future<void> _onSendOtp() async {
     final number = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
 
@@ -512,37 +493,81 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
       }
 
       // MSG91 OTP verified successfully
-      // Since Firebase Phone Auth requires reCAPTCHA on web, use Anonymous Auth
-      // The phone number is already verified by MSG91
-      debugPrint('Phone verified via MSG91, authenticating with Firebase Anonymous...');
-      
       final phoneNumber = '+91${_phoneController.text.trim()}';
+      final email = 'phone_$_phoneNumber@santnarhari.com';
+      final password = '${_phoneNumber}_default_pass_2024';
       
-      // Sign in anonymously (works on web without reCAPTCHA)
+      UserCredential? cred;
+      
       try {
-        final cred = await FirebaseAuthService.instance.signInAnonymously();
+        // Try to sign in first (existing user)
+        try {
+          cred = await FirebaseAuthService.instance.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          debugPrint('Existing user signed in successfully');
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+            // User doesn't exist, create new account
+            debugPrint('New user detected, creating account...');
+            cred = await FirebaseAuthService.instance.createUserWithEmailAndPassword(
+              email: email,
+              password: password,
+            );
+            debugPrint('New user account created successfully');
+          } else {
+            rethrow;
+          }
+        }
         
         if (cred.user != null && mounted) {
           final uid = cred.user!.uid;
           final displayName = 'User ${_phoneController.text.trim()}';
           
-          debugPrint('Anonymous auth successful, UID: $uid');
-          debugPrint('Saving verified phone to Firestore...');
-          
-          // Save the MSG91-verified phone number to Firestore
+          // Save/update user profile
           try {
             await FirestoreService.instance.setUserProfile(
               uid: uid,
+              email: email,
               phoneNumber: phoneNumber,
               displayName: displayName,
             );
             debugPrint('User profile saved successfully');
             
+            // Check if user has valid subscription
+            final hasValidSubscription = await FirestoreService.instance.hasActiveSubscription(uid);
+            
             if (!mounted) return;
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const MainShellScreen()),
-              (route) => false,
-            );
+            
+            if (hasValidSubscription) {
+              // User has valid membership, navigate to home
+              debugPrint('User has valid subscription, navigating to home...');
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const MainShellScreen()),
+                (route) => false,
+              );
+            } else {
+              // New user or expired subscription, navigate to payment screen
+              debugPrint('User needs payment, navigating to payment screen...');
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => PaymentScreen(
+                    featureId: PaymentConfig.loginYearly,
+                    amount: PaymentConfig.loginYearlyAmount,
+                  ),
+                ),
+                (route) => false,
+              ).then((paid) {
+                // After payment, navigate to home
+                if (paid == true && mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const MainShellScreen()),
+                    (route) => false,
+                  );
+                }
+              });
+            }
           } catch (e) {
             debugPrint('Error saving profile: $e');
             if (mounted) {
@@ -563,24 +588,65 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
         if (mounted) {
           setState(() => _loading = false);
           
-          String errorMessage;
-          if (authError.code == 'api-key-not-valid') {
-            errorMessage = 'Firebase setup incomplete. Please enable Anonymous Authentication in Firebase Console:\n\n'
-                '1. Go to Firebase Console\n'
-                '2. Authentication → Sign-in method\n'
-                '3. Enable "Anonymous"\n'
-                '4. Save and try again';
+          if (authError.code == 'email-already-in-use') {
+            // Try to sign in instead
+            try {
+              cred = await FirebaseAuthService.instance.signInWithEmailAndPassword(
+                email: email,
+                password: password,
+              );
+              if (cred.user != null && mounted) {
+                final uid = cred.user!.uid;
+                final hasValidSubscription = await FirestoreService.instance.hasActiveSubscription(uid);
+                if (!mounted) return;
+                
+                if (hasValidSubscription) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const MainShellScreen()),
+                    (route) => false,
+                  );
+                } else {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => PaymentScreen(
+                        featureId: PaymentConfig.loginYearly,
+                        amount: PaymentConfig.loginYearlyAmount,
+                      ),
+                    ),
+                    (route) => false,
+                  ).then((paid) {
+                    if (paid == true && mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const MainShellScreen()),
+                        (route) => false,
+                      );
+                    }
+                  });
+                }
+                return;
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Authentication error: ${authError.message}'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 8),
+                  ),
+                );
+              }
+            }
           } else {
-            errorMessage = 'Firebase error: ${authError.message}';
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Firebase error: ${authError.message}'),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 8),
+                ),
+              );
+            }
           }
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 8),
-            ),
-          );
         }
       }
     } catch (e) {

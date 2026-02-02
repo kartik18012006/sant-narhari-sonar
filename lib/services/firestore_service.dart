@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../razorpay_config.dart';
+
 /// Razorpay (or other gateway) config fetched from Firestore.
 /// keySecret is optional; when set (test only), app can create orders from client for UPI/Card checkout.
 class PaymentGatewayConfig {
@@ -300,6 +302,32 @@ class FirestoreService {
     String? district,
     String? state,
     String? country,
+    // Family Details (Section 5)
+    String? fatherName,
+    String? fatherOccupation,
+    String? motherName,
+    String? motherOccupation,
+    String? siblings,
+    String? nativePlace,
+    String? uncle,
+    String? aunt,
+    List<Map<String, String>>? otherFamilyMembers,
+    List<Map<String, String>>? otherRelatives,
+    // Address Details (Section 6)
+    String? permanentAddressLine,
+    String? permanentPincode,
+    String? permanentVillageCity,
+    String? permanentTaluka,
+    String? permanentDistrict,
+    String? permanentState,
+    String? permanentCountry,
+    String? currentAddressLine,
+    String? currentPincode,
+    String? currentVillageCity,
+    String? currentTaluka,
+    String? currentDistrict,
+    String? currentState,
+    String? currentCountry,
     String? expectedEducation,
     String? expectedOccupation,
     String? expectedHeight,
@@ -349,6 +377,32 @@ class FirestoreService {
       'district': district,
       'state': state,
       'country': country,
+      // Family Details
+      'fatherName': fatherName,
+      'fatherOccupation': fatherOccupation,
+      'motherName': motherName,
+      'motherOccupation': motherOccupation,
+      'siblings': siblings,
+      'nativePlace': nativePlace,
+      'uncle': uncle,
+      'aunt': aunt,
+      'otherFamilyMembers': otherFamilyMembers ?? [],
+      'otherRelatives': otherRelatives ?? [],
+      // Address Details
+      'permanentAddressLine': permanentAddressLine,
+      'permanentPincode': permanentPincode,
+      'permanentVillageCity': permanentVillageCity,
+      'permanentTaluka': permanentTaluka,
+      'permanentDistrict': permanentDistrict,
+      'permanentState': permanentState,
+      'permanentCountry': permanentCountry,
+      'currentAddressLine': currentAddressLine,
+      'currentPincode': currentPincode,
+      'currentVillageCity': currentVillageCity,
+      'currentTaluka': currentTaluka,
+      'currentDistrict': currentDistrict,
+      'currentState': currentState,
+      'currentCountry': currentCountry,
       'expectedEducation': expectedEducation,
       'expectedOccupation': expectedOccupation,
       'expectedHeight': expectedHeight,
@@ -444,12 +498,30 @@ class FirestoreService {
 
   /// Fetch payment gateway config from Firestore (collection [payment]).
   /// Tries document IDs: razorpay, then test, then first document in collection.
+  /// Falls back to live keys from RazorpayConfig if Firestore config not found.
   /// Expected fields: key_id or keyId (required), mode (optional, default 'test').
   Future<PaymentGatewayConfig?> getPaymentGatewayConfig() async {
-    for (final docId in ['razorpay', 'test']) {
-      final snap = await _paymentCollection.doc(docId).get();
-      final data = snap.data();
-      if (data != null) {
+    // Try Firestore first
+    for (final docId in ['razorpay', 'test', 'live']) {
+      try {
+        final snap = await _paymentCollection.doc(docId).get();
+        final data = snap.data();
+        if (data != null) {
+          final keyId = data['key_id'] as String? ?? data['keyId'] as String? ?? data['key'] as String?;
+          if (keyId != null && keyId.isNotEmpty) {
+            final mode = data['mode'] as String? ?? 'test';
+            final keySecret = data['key_secret'] as String? ?? data['keySecret'] as String? ?? data['secret'] as String?;
+            return PaymentGatewayConfig(keyId: keyId, mode: mode, keySecret: keySecret);
+          }
+        }
+      } catch (e) {
+        // Continue to next doc or fallback
+      }
+    }
+    try {
+      final first = await _paymentCollection.limit(1).get();
+      if (first.docs.isNotEmpty) {
+        final data = first.docs.first.data();
         final keyId = data['key_id'] as String? ?? data['keyId'] as String? ?? data['key'] as String?;
         if (keyId != null && keyId.isNotEmpty) {
           final mode = data['mode'] as String? ?? 'test';
@@ -457,17 +529,19 @@ class FirestoreService {
           return PaymentGatewayConfig(keyId: keyId, mode: mode, keySecret: keySecret);
         }
       }
+    } catch (e) {
+      // Fall through to live keys
     }
-    final first = await _paymentCollection.limit(1).get();
-    if (first.docs.isNotEmpty) {
-      final data = first.docs.first.data();
-      final keyId = data['key_id'] as String? ?? data['keyId'] as String? ?? data['key'] as String?;
-      if (keyId != null && keyId.isNotEmpty) {
-        final mode = data['mode'] as String? ?? 'test';
-        final keySecret = data['key_secret'] as String? ?? data['keySecret'] as String? ?? data['secret'] as String?;
-        return PaymentGatewayConfig(keyId: keyId, mode: mode, keySecret: keySecret);
-      }
+    
+    // Fallback to live keys from config
+    if (RazorpayConfig.useLiveKeys) {
+      return PaymentGatewayConfig(
+        keyId: RazorpayConfig.liveKeyId,
+        mode: RazorpayConfig.mode,
+        keySecret: RazorpayConfig.liveKeySecret,
+      );
     }
+    
     return null;
   }
 
@@ -780,12 +854,16 @@ class FirestoreService {
     required String text,
     String? userEmail,
     String? userDisplayName,
+    String? feedbackType,
+    String? attachmentUrl,
   }) async {
     await _feedback.add({
       'userId': userId,
       'text': text,
       'userEmail': userEmail,
       'userDisplayName': userDisplayName,
+      'feedbackType': feedbackType,
+      'attachmentUrl': attachmentUrl,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });

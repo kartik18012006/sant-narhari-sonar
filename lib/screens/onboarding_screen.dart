@@ -6,7 +6,7 @@ import 'main_shell_screen.dart';
 import 'rules_screen.dart';
 
 /// First content screen: onboarding / welcome (APK-style).
-/// No AppBar — logo top-left, Skip top-right; two logos center; gold primary CTA, outline secondary.
+/// No AppBar — logo top-left; two logos center; gold primary CTA, outline secondary.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -33,22 +33,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              // Top bar: logo (left), Skip (right) — same on every start screen
+              // Top bar: logo (left)
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _AppIcon(assetPath: 'assets/app logo.png', color: AppTheme.gold),
-                  TextButton(
-                    onPressed: _onSkip,
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(
-                        color: AppTheme.goldDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -127,12 +116,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  void _onSkip() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
-      (route) => false,
-    );
-  }
 
   void _onCreateProfile() {
     Navigator.of(context).push(

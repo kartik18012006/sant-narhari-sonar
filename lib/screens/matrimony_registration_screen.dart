@@ -57,6 +57,37 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
   final _stateController = TextEditingController();
   final _countryController = TextEditingController();
 
+  // Family Details (Section 5)
+  final _fatherNameController = TextEditingController();
+  final _fatherOccupationController = TextEditingController();
+  final _motherNameController = TextEditingController();
+  final _motherOccupationController = TextEditingController();
+  final _siblingsController = TextEditingController();
+  final _nativePlaceController = TextEditingController();
+  final _uncleController = TextEditingController();
+  final _auntController = TextEditingController();
+  final List<_FamilyMemberEntry> _otherFamilyMembers = [];
+  final List<_FamilyMemberEntry> _otherRelatives = [];
+
+  // Address Details (Section 6)
+  // Permanent Address
+  final _permanentAddressLineController = TextEditingController();
+  final _permanentPincodeController = TextEditingController();
+  final _permanentVillageCityController = TextEditingController();
+  final _permanentTalukaController = TextEditingController();
+  final _permanentDistrictController = TextEditingController();
+  final _permanentStateController = TextEditingController();
+  final _permanentCountryController = TextEditingController();
+  // Current Address
+  bool _sameAsPermanent = false;
+  final _currentAddressLineController = TextEditingController();
+  final _currentPincodeController = TextEditingController();
+  final _currentVillageCityController = TextEditingController();
+  final _currentTalukaController = TextEditingController();
+  final _currentDistrictController = TextEditingController();
+  final _currentStateController = TextEditingController();
+  final _currentCountryController = TextEditingController();
+
   // Partner Preferences
   final _expectedEducationController = TextEditingController();
   final _expectedOccupationController = TextEditingController();
@@ -88,6 +119,7 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
   // Custom "Other" values
   final _subCasteOtherController = TextEditingController();
   final _gotraOtherController = TextEditingController();
+  final _nakshatraOtherController = TextEditingController();
 
   // Family Members
   final List<_FamilyMemberEntry> _familyMembers = [];
@@ -132,6 +164,28 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
     _districtController.dispose();
     _stateController.dispose();
     _countryController.dispose();
+    _fatherNameController.dispose();
+    _fatherOccupationController.dispose();
+    _motherNameController.dispose();
+    _motherOccupationController.dispose();
+    _siblingsController.dispose();
+    _nativePlaceController.dispose();
+    _uncleController.dispose();
+    _auntController.dispose();
+    _permanentAddressLineController.dispose();
+    _permanentPincodeController.dispose();
+    _permanentVillageCityController.dispose();
+    _permanentTalukaController.dispose();
+    _permanentDistrictController.dispose();
+    _permanentStateController.dispose();
+    _permanentCountryController.dispose();
+    _currentAddressLineController.dispose();
+    _currentPincodeController.dispose();
+    _currentVillageCityController.dispose();
+    _currentTalukaController.dispose();
+    _currentDistrictController.dispose();
+    _currentStateController.dispose();
+    _currentCountryController.dispose();
     _expectedEducationController.dispose();
     _expectedOccupationController.dispose();
     _expectedHeightController.dispose();
@@ -140,7 +194,14 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
     _lifeGoalsController.dispose();
     _subCasteOtherController.dispose();
     _gotraOtherController.dispose();
+    _nakshatraOtherController.dispose();
     for (final member in _familyMembers) {
+      member.dispose();
+    }
+    for (final member in _otherFamilyMembers) {
+      member.dispose();
+    }
+    for (final member in _otherRelatives) {
       member.dispose();
     }
     super.dispose();
@@ -199,6 +260,36 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
   void _removeFamilyMember(int index) {
     _familyMembers[index].dispose();
     setState(() => _familyMembers.removeAt(index));
+  }
+
+  void _addOtherFamilyMember() {
+    setState(() => _otherFamilyMembers.add(_FamilyMemberEntry()));
+  }
+
+  void _removeOtherFamilyMember(int index) {
+    _otherFamilyMembers[index].dispose();
+    setState(() => _otherFamilyMembers.removeAt(index));
+  }
+
+  void _addOtherRelative() {
+    setState(() => _otherRelatives.add(_FamilyMemberEntry()));
+  }
+
+  void _removeOtherRelative(int index) {
+    _otherRelatives[index].dispose();
+    setState(() => _otherRelatives.removeAt(index));
+  }
+
+  void _copyPermanentToCurrent() {
+    setState(() {
+      _currentAddressLineController.text = _permanentAddressLineController.text;
+      _currentPincodeController.text = _permanentPincodeController.text;
+      _currentVillageCityController.text = _permanentVillageCityController.text;
+      _currentTalukaController.text = _permanentTalukaController.text;
+      _currentDistrictController.text = _permanentDistrictController.text;
+      _currentStateController.text = _permanentStateController.text;
+      _currentCountryController.text = _permanentCountryController.text;
+    });
   }
 
   Future<String?> _uploadPhoto(String photoType) async {
@@ -315,7 +406,9 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
         bloodGroup: _bloodGroup,
         diet: _diet,
         manglik: _manglik,
-        nakshatra: _nakshatra,
+        nakshatra: (_nakshatra != null && (_nakshatra!.contains('Other') || _nakshatra!.contains('इतर'))) && _nakshatraOtherController.text.trim().isNotEmpty
+            ? _nakshatraOtherController.text.trim()
+            : _nakshatra,
         rashi: _rashi,
         gotra: (_gotra != null && (_gotra!.contains('Other') || _gotra!.contains('इतर'))) && _gotraOtherController.text.trim().isNotEmpty
             ? _gotraOtherController.text.trim()
@@ -335,6 +428,58 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
         district: _districtController.text.trim().isEmpty ? null : _districtController.text.trim(),
         state: _stateController.text.trim().isEmpty ? null : _stateController.text.trim(),
         country: _countryController.text.trim().isEmpty ? null : _countryController.text.trim(),
+        // Family Details (Section 5)
+        fatherName: _fatherNameController.text.trim().isEmpty ? null : _fatherNameController.text.trim(),
+        fatherOccupation: _fatherOccupationController.text.trim().isEmpty ? null : _fatherOccupationController.text.trim(),
+        motherName: _motherNameController.text.trim().isEmpty ? null : _motherNameController.text.trim(),
+        motherOccupation: _motherOccupationController.text.trim().isEmpty ? null : _motherOccupationController.text.trim(),
+        siblings: _siblingsController.text.trim().isEmpty ? null : _siblingsController.text.trim(),
+        nativePlace: _nativePlaceController.text.trim().isEmpty ? null : _nativePlaceController.text.trim(),
+        uncle: _uncleController.text.trim().isEmpty ? null : _uncleController.text.trim(),
+        aunt: _auntController.text.trim().isEmpty ? null : _auntController.text.trim(),
+        otherFamilyMembers: _otherFamilyMembers
+            .map((e) => {
+                  'name': e.name.text.trim(),
+                  'relation': e.relation.text.trim(),
+                })
+            .where((m) => m['name']!.isNotEmpty)
+            .toList(),
+        otherRelatives: _otherRelatives
+            .map((e) => {
+                  'name': e.name.text.trim(),
+                  'relation': e.relation.text.trim(),
+                })
+            .where((m) => m['name']!.isNotEmpty)
+            .toList(),
+        // Address Details (Section 6)
+        permanentAddressLine: _permanentAddressLineController.text.trim().isEmpty ? null : _permanentAddressLineController.text.trim(),
+        permanentPincode: _permanentPincodeController.text.trim().isEmpty ? null : _permanentPincodeController.text.trim(),
+        permanentVillageCity: _permanentVillageCityController.text.trim().isEmpty ? null : _permanentVillageCityController.text.trim(),
+        permanentTaluka: _permanentTalukaController.text.trim().isEmpty ? null : _permanentTalukaController.text.trim(),
+        permanentDistrict: _permanentDistrictController.text.trim().isEmpty ? null : _permanentDistrictController.text.trim(),
+        permanentState: _permanentStateController.text.trim().isEmpty ? null : _permanentStateController.text.trim(),
+        permanentCountry: _permanentCountryController.text.trim().isEmpty ? null : _permanentCountryController.text.trim(),
+        currentAddressLine: _sameAsPermanent
+            ? (_permanentAddressLineController.text.trim().isEmpty ? null : _permanentAddressLineController.text.trim())
+            : (_currentAddressLineController.text.trim().isEmpty ? null : _currentAddressLineController.text.trim()),
+        currentPincode: _sameAsPermanent
+            ? (_permanentPincodeController.text.trim().isEmpty ? null : _permanentPincodeController.text.trim())
+            : (_currentPincodeController.text.trim().isEmpty ? null : _currentPincodeController.text.trim()),
+        currentVillageCity: _sameAsPermanent
+            ? (_permanentVillageCityController.text.trim().isEmpty ? null : _permanentVillageCityController.text.trim())
+            : (_currentVillageCityController.text.trim().isEmpty ? null : _currentVillageCityController.text.trim()),
+        currentTaluka: _sameAsPermanent
+            ? (_permanentTalukaController.text.trim().isEmpty ? null : _permanentTalukaController.text.trim())
+            : (_currentTalukaController.text.trim().isEmpty ? null : _currentTalukaController.text.trim()),
+        currentDistrict: _sameAsPermanent
+            ? (_permanentDistrictController.text.trim().isEmpty ? null : _permanentDistrictController.text.trim())
+            : (_currentDistrictController.text.trim().isEmpty ? null : _currentDistrictController.text.trim()),
+        currentState: _sameAsPermanent
+            ? (_permanentStateController.text.trim().isEmpty ? null : _permanentStateController.text.trim())
+            : (_currentStateController.text.trim().isEmpty ? null : _currentStateController.text.trim()),
+        currentCountry: _sameAsPermanent
+            ? (_permanentCountryController.text.trim().isEmpty ? null : _permanentCountryController.text.trim())
+            : (_currentCountryController.text.trim().isEmpty ? null : _currentCountryController.text.trim()),
         expectedEducation: _expectedEducationController.text.trim().isEmpty ? null : _expectedEducationController.text.trim(),
         expectedOccupation: _expectedOccupationController.text.trim().isEmpty ? null : _expectedOccupationController.text.trim(),
         expectedHeight: _expectedHeightController.text.trim().isEmpty ? null : _expectedHeightController.text.trim(),
@@ -675,7 +820,7 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
             ),
             const SizedBox(height: 32),
 
-            // Section 5: Location
+            // Section 4: Location
             _buildSectionHeader('4. Location / स्थान'),
             const SizedBox(height: 16),
             _buildTextField(
@@ -697,7 +842,415 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
             ),
             const SizedBox(height: 32),
 
-            // Section 6: Partner Preferences
+            // Section 5: Family Details
+            _buildSectionHeader('5. Family Details / कौटुंबिक माहिती', color: Colors.pink.shade100),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Father\'s Name / वडिलांचे नाव',
+                    controller: _fatherNameController,
+                    icon: Icons.person,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Father\'s Occupation / वडिलांचा व्यवसाय',
+                    controller: _fatherOccupationController,
+                    icon: Icons.work,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Mother\'s Name / आईचे नाव',
+                    controller: _motherNameController,
+                    icon: Icons.person,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Mother\'s Occupation / आईचा व्यवसाय',
+                    controller: _motherOccupationController,
+                    icon: Icons.work,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Brother / Sister (Number & Status) / भाऊ / बहीण (संख्या व स्थिती)',
+              controller: _siblingsController,
+              icon: Icons.people,
+              hint: 'e.g., 1 married brother, 1 unmarried sister',
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Family\'s Native Place (Village, District) / कुटुंबातील स्थळ (गाव, जिल्हा)',
+              controller: _nativePlaceController,
+              icon: Icons.location_on,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Uncle / काका',
+                    controller: _uncleController,
+                    icon: Icons.person_outline,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Aunt / काकू',
+                    controller: _auntController,
+                    icon: Icons.person_outline,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: AppTheme.buttonHeight,
+              child: FilledButton.icon(
+                onPressed: _addOtherFamilyMember,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text(
+                  '+ Add Other Family Members / घरातील इतर सदस्य जोडा',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.pink.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...List.generate(_otherFamilyMembers.length, (i) {
+              final e = _otherFamilyMembers[i];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Family Member ${i + 1}',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                          ),
+                          IconButton(
+                            onPressed: () => _removeOtherFamilyMember(i),
+                            icon: Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade600),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        label: 'Name / नाव',
+                        controller: e.name,
+                        icon: Icons.person,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildTextField(
+                        label: 'Relation / नाते',
+                        controller: e.relation,
+                        icon: Icons.people,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: AppTheme.buttonHeight,
+              child: FilledButton.icon(
+                onPressed: _addOtherRelative,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text(
+                  '+ Add Other Relatives / इतर पाहुणे जोडा',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.pink.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...List.generate(_otherRelatives.length, (i) {
+              final e = _otherRelatives[i];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Relative ${i + 1}',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                          ),
+                          IconButton(
+                            onPressed: () => _removeOtherRelative(i),
+                            icon: Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade600),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _buildTextField(
+                        label: 'Name / नाव',
+                        controller: e.name,
+                        icon: Icons.person,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildTextField(
+                        label: 'Relation / नाते',
+                        controller: e.relation,
+                        icon: Icons.people,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 32),
+
+            // Section 6: Address Details
+            _buildSectionHeader('6. Address Details / पत्ता तपशील', color: Colors.pink.shade100),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.home, size: 16, color: Colors.grey.shade700),
+                const SizedBox(width: 4),
+                Text(
+                  'Permanent Address / कायमचा पत्ता',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              label: 'Address Line / पत्ता',
+              controller: _permanentAddressLineController,
+              icon: Icons.location_on,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Pincode / पिनकोड',
+                    controller: _permanentPincodeController,
+                    icon: Icons.pin,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Village/City / गाव/शहर',
+                    controller: _permanentVillageCityController,
+                    icon: Icons.location_city,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Taluka / तालुका',
+                    controller: _permanentTalukaController,
+                    icon: Icons.map,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'District / जिल्हा',
+                    controller: _permanentDistrictController,
+                    icon: Icons.location_city,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    label: 'State / राज्य',
+                    controller: _permanentStateController,
+                    icon: Icons.map,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    label: 'Country / देश',
+                    controller: _permanentCountryController,
+                    icon: Icons.public,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(Icons.home_outlined, size: 16, color: Colors.grey.shade700),
+                const SizedBox(width: 4),
+                Text(
+                  'Current Address / सध्याचा पत्ता',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Checkbox(
+                  value: _sameAsPermanent,
+                  onChanged: (value) {
+                    setState(() {
+                      _sameAsPermanent = value ?? false;
+                      if (_sameAsPermanent) {
+                        _copyPermanentToCurrent();
+                      } else {
+                        _currentAddressLineController.clear();
+                        _currentPincodeController.clear();
+                        _currentVillageCityController.clear();
+                        _currentTalukaController.clear();
+                        _currentDistrictController.clear();
+                        _currentStateController.clear();
+                        _currentCountryController.clear();
+                      }
+                    });
+                  },
+                  activeColor: AppTheme.gold,
+                ),
+                Expanded(
+                  child: Text(
+                    'Same as Permanent / कायमच्या पत्त्याप्रमाणेच',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (!_sameAsPermanent) ...[
+              _buildTextField(
+                label: 'Address Line / पत्ता',
+                controller: _currentAddressLineController,
+                icon: Icons.location_on,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Pincode / पिनकोड',
+                      controller: _currentPincodeController,
+                      icon: Icons.pin,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Village/City / गाव/शहर',
+                      controller: _currentVillageCityController,
+                      icon: Icons.location_city,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Taluka / तालुका',
+                      controller: _currentTalukaController,
+                      icon: Icons.map,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'District / जिल्हा',
+                      controller: _currentDistrictController,
+                      icon: Icons.location_city,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'State / राज्य',
+                      controller: _currentStateController,
+                      icon: Icons.map,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Country / देश',
+                      controller: _currentCountryController,
+                      icon: Icons.public,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 32),
+
+            // Section 7: Partner Preferences
             _buildSectionHeader('7. Partner Preferences / जोडीदाराविषयी अपेक्षा ❤️', color: Colors.red.shade100),
             const SizedBox(height: 16),
             _buildTextField(
@@ -1107,6 +1660,8 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
       otherController = _subCasteOtherController;
     } else if (label.contains('Gotra')) {
       otherController = _gotraOtherController;
+    } else if (label.contains('Nakshatra')) {
+      otherController = _nakshatraOtherController;
     }
 
     return Column(
@@ -1212,7 +1767,10 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
                     else if (label.contains('Blood Group')) _bloodGroup = null;
                     else if (label.contains('Diet')) _diet = null;
                     else if (label.contains('Manglik')) _manglik = null;
-                    else if (label.contains('Nakshatra')) _nakshatra = null;
+                    else if (label.contains('Nakshatra')) {
+                      _nakshatra = null;
+                      _nakshatraOtherController.clear();
+                    }
                     else if (label.contains('Rashi')) _rashi = null;
                     else if (label.contains('Gotra')) {
                       _gotra = null;
@@ -1234,7 +1792,10 @@ class _MatrimonyRegistrationScreenState extends State<MatrimonyRegistrationScree
                     else if (label.contains('Blood Group')) _bloodGroup = v;
                     else if (label.contains('Diet')) _diet = v;
                     else if (label.contains('Manglik')) _manglik = v;
-                    else if (label.contains('Nakshatra')) _nakshatra = v;
+                    else if (label.contains('Nakshatra')) {
+                      _nakshatra = v;
+                      if (!isOtherSelected) _nakshatraOtherController.clear();
+                    }
                     else if (label.contains('Rashi')) _rashi = v;
                     else if (label.contains('Gotra')) {
                       _gotra = v;

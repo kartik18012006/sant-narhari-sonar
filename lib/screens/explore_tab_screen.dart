@@ -10,8 +10,9 @@ import 'birthdays_screen.dart';
 import 'business_list_screen.dart';
 import 'advertisement_terms_screen.dart';
 import 'create_event_screen.dart';
+import 'create_news_screen.dart';
 import 'my_events_screen.dart';
-import 'news_terms_screen.dart';
+import 'news_search_screen.dart';
 import 'family_directory_screen.dart';
 import 'feedback_screen.dart';
 import 'matrimony_search_screen.dart';
@@ -346,9 +347,42 @@ class ExploreTabScreen extends StatelessWidget {
             ),
           ).then((paid) {
             if (paid == true && context.mounted) {
-              Navigator.of(context).push(
-                MaterialPageRoute<bool>(
-                  builder: (_) => const NewsTermsScreen(),
+              // Show options: Add News or Search News
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('News / बातम्या'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.add_circle_outline, color: AppTheme.gold),
+                        title: const Text('Add News / बातमी जोडा'),
+                        subtitle: const Text('Create and publish news'),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute<bool>(
+                              builder: (_) => const CreateNewsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.search, color: AppTheme.gold),
+                        title: const Text('Search News / बातम्या शोधा'),
+                        subtitle: const Text('Search existing news'),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const NewsSearchScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             }

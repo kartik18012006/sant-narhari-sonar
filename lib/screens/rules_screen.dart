@@ -15,24 +15,13 @@ class RulesScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header: app icon (left), Skip (right) — same as onboarding
+            // Header: app icon (left)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _buildAppIcon(),
-                  TextButton(
-                    onPressed: () => _onSkip(context),
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(
-                        color: AppTheme.goldDark,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -240,12 +229,6 @@ class RulesScreen extends StatelessWidget {
     );
   }
 
-  void _onSkip(BuildContext context) {
-    // Skip: go to next screen (Login/Sign Up), not back to first
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
-    );
-  }
 
   void _onContinue(BuildContext context) {
     Navigator.of(context).push(

@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
 import 'email_login_screen.dart';
-import 'main_shell_screen.dart';
 import 'phone_otp_screen.dart';
 
-/// Login / Sign Up — choose Phone or Email (APK-style: white screen, gold Skip, same padding).
+/// Login / Sign Up — choose Phone or Email (APK-style: white screen, same padding).
 class LoginSignupScreen extends StatelessWidget {
   const LoginSignupScreen({super.key});
 
@@ -21,19 +20,6 @@ class LoginSignupScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => _onSkip(context),
-            child: const Text(
-              'Skip',
-              style: TextStyle(
-                color: AppTheme.goldDark,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -101,14 +87,6 @@ class LoginSignupScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  void _onSkip(BuildContext context) {
-    // Skip: go to main app (next), not back to first screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
-      (route) => false,
     );
   }
 

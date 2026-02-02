@@ -39,19 +39,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          TextButton(
-            onPressed: _loading ? null : _onSkip,
-            child: Text(
-              'Skip',
-              style: TextStyle(
-                color: _loading ? Colors.grey : AppTheme.goldDark,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -204,15 +191,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       ),
     );
   }
-
-  void _onSkip() {
-    // Skip: go to main app (next), not back to first screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
-      (route) => false,
-    );
-  }
-
 
   Future<void> _onSubmit() async {
     final email = _emailController.text.trim();
