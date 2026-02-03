@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
-import '../payment_config.dart';
 import 'family_directory_list_screen.dart';
 import 'family_directory_terms_screen.dart';
-import 'payment_screen.dart';
 
-/// Family Directory — pay ₹101 to access, then register family & search directory. Matches APK.
+/// Family Directory — free registration and search. Matches APK.
 class FamilyDirectoryScreen extends StatelessWidget {
   const FamilyDirectoryScreen({super.key});
 
@@ -43,12 +41,12 @@ class FamilyDirectoryScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 28),
-              // Lock icon
-              const Icon(Icons.lock, size: 80, color: AppTheme.gold),
+              // Family icon
+              const Icon(Icons.family_restroom, size: 80, color: AppTheme.gold),
               const SizedBox(height: 24),
-              // Pay to Access
+              // Welcome message
               const Text(
-                'Pay to Access Family Directory',
+                'Family Directory',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -58,13 +56,13 @@ class FamilyDirectoryScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'पेमेंट केल्यानंतर कुटुंब निर्देशिका',
+                'कुटुंब निर्देशिका',
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               Text(
-                'You can register your family and search the directory only after you have completed the payment.',
+                'Register your family and search the directory for free.',
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.5),
                 textAlign: TextAlign.center,
               ),
@@ -106,25 +104,6 @@ class FamilyDirectoryScreen extends StatelessWidget {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
-              const SizedBox(height: 32),
-              // Pay Now
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: () => _onPayNow(context),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.gold,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                    ),
-                  ),
-                  child: Text(
-                    'Pay Now (${PaymentConfig.formattedAmount(PaymentConfig.familyDirectoryAmount)}) / आता पैसे द्या',
-                  ),
-                ),
-              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -133,76 +112,20 @@ class FamilyDirectoryScreen extends StatelessWidget {
     );
   }
 
-  void _onRegisterFamily(BuildContext context) async {
-    // APK: Pay first, then open registration form. Same flow as Explore Business.
-    final paid = await Navigator.of(context).push<bool>(
+  void _onRegisterFamily(BuildContext context) {
+    // Family Directory is free - directly open registration form
+    Navigator.of(context).push(
       MaterialPageRoute<bool>(
-        builder: (_) => PaymentScreen(
-          featureId: PaymentConfig.familyDirectory,
-          amount: PaymentConfig.familyDirectoryAmount,
-        ),
+        builder: (_) => const FamilyDirectoryTermsScreen(),
       ),
     );
-    if (paid == true && context.mounted) {
-      // Wait a bit for payment to be recorded
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (context.mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute<bool>(
-            builder: (_) => const FamilyDirectoryTermsScreen(),
-          ),
-        );
-      }
-    }
   }
 
-  void _onSearch(BuildContext context) async {
-    // APK: Pay first, then search. Same flow.
-    final paid = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (_) => PaymentScreen(
-          featureId: PaymentConfig.familyDirectory,
-          amount: PaymentConfig.familyDirectoryAmount,
-        ),
-      ),
+  void _onSearch(BuildContext context) {
+    // Family Directory is free - directly open search
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const FamilyDirectoryListScreen()),
     );
-    if (paid == true && context.mounted) {
-      // Wait a bit for payment to be recorded
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment successful. You can now search the family directory.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const FamilyDirectoryListScreen()),
-        );
-      }
-    }
   }
 
-  void _onPayNow(BuildContext context) async {
-    final paid = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (_) => PaymentScreen(
-          featureId: PaymentConfig.familyDirectory,
-          amount: PaymentConfig.familyDirectoryAmount,
-        ),
-      ),
-    );
-    if (paid == true && context.mounted) {
-      // Wait a bit for payment to be recorded
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment successful. You can now register family and search directory.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    }
-  }
 }

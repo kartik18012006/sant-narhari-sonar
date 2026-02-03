@@ -12,7 +12,7 @@ import '../payment_config.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/firestore_service.dart';
 
-/// Payment screen: feature name, amount, payment method (UPI, Card/Net Banking, Other), Pay button.
+/// Payment screen: feature name, amount, payment method (UPI, Card/Net Banking), Pay button.
 /// UPI and Card open Razorpay checkout when Firestore payment doc has key_id and key_secret (test).
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({
@@ -32,7 +32,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  // Web and mobile: upi | card | other
+  // Web and mobile: upi | card
   String _selectedMethod = 'upi';
   PaymentGatewayConfig? _gatewayConfig;
   bool _configLoading = true;
@@ -324,24 +324,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 isSelected: _selectedMethod == 'card',
                 onTap: () => setState(() => _selectedMethod = 'card'),
               ),
-              const SizedBox(height: 10),
-              _PaymentOption(
-                value: 'other',
-                label: 'Other',
-                subtitle: 'Bank transfer or cash (contact admin)',
-                icon: Icons.more_horiz,
-                isSelected: _selectedMethod == 'other',
-                onTap: () => setState(() => _selectedMethod = 'other'),
-              ),
               const SizedBox(height: 32),
-              // Pay button: enabled when config loaded, or when "Other" is selected (proceed without gateway)
+              // Pay button: enabled when config loaded
               SizedBox(
                 width: double.infinity,
                 height: AppTheme.buttonHeight,
                 child: FilledButton(
                   onPressed: (_configLoading || _checkoutOpen)
                       ? null
-                      : (_gatewayConfig != null || _selectedMethod == 'other')
+                      : (_gatewayConfig != null)
                           ? _onPay
                           : null,
                   style: FilledButton.styleFrom(
@@ -367,46 +358,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Future<void> _onPay() async {
     final config = _gatewayConfig;
-    final isOther = _selectedMethod == 'other';
     final isUpiOrCard = _selectedMethod == 'upi' || _selectedMethod == 'card';
-
-    if (isOther) {
-      // Other: bank transfer / testing — no gateway
-      final uid = FirebaseAuthService.instance.currentUser?.uid;
-      final isSubscription = widget.featureId == PaymentConfig.loginYearly;
-      if (uid != null) {
-        await FirestoreService.instance.recordPayment(
-          userId: uid,
-          featureId: widget.featureId,
-          amountInr: _amount,
-          status: 'success',
-          transactionId: 'other',
-        );
-        if (isSubscription) {
-          final validUntil = DateTime.now().add(const Duration(days: 365));
-          await FirestoreService.instance.setSubscriptionValidUntil(uid, validUntil);
-        }
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isSubscription
-                ? 'Subscription active. You now have full app access.'
-                : 'Payment recorded (Other). ${PaymentConfig.formattedAmount(_amount)} — contact admin for bank transfer.',
-          ),
-          backgroundColor: Colors.green.shade700,
-        ),
-      );
-      Navigator.of(context).pop(true);
-      return;
-    }
 
     // UPI or Card: need gateway config and key_secret to create order (test)
     if (config == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment config not found. Add key_id (and key_secret for UPI/Card) in Firestore payment collection, or choose Other.')),
+          const SnackBar(content: Text('Payment config not found. Add key_id and key_secret in Firestore payment collection.')),
         );
       }
       return;
@@ -417,7 +375,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'For UPI/Card, add key_secret in Firestore (payment doc). Get test keys from Razorpay Dashboard. Or choose Other.',
+              'For UPI/Card, add key_secret in Firestore (payment doc). Get test keys from Razorpay Dashboard.',
             ),
           ),
         );

@@ -9,7 +9,7 @@
 /// - News: ₹101 (24 hours) — Social News Event free
 /// - Events: ₹101 (24 hours) — Social Event free
 /// - Matrimonial registration: ₹2100 (yearly)
-/// - Family Directory: ₹101 (one-time access)
+/// - Family Directory: Free
 enum PaymentFeeType { yearly, oneTime, per24Hours, free }
 
 class PaymentConfig {
@@ -23,6 +23,10 @@ class PaymentConfig {
   static const String news = 'news';
   static const String events = 'events';
   static const String matrimonialYearly = 'matrimonial_yearly';
+  static const String brideRegistration = 'bride_registration';
+  static const String groomRegistration = 'groom_registration';
+  static const String brideSearch = 'bride_search';
+  static const String groomSearch = 'groom_search';
   static const String familyDirectory = 'family_directory';
 
   // --- Amounts (INR) ---
@@ -33,7 +37,11 @@ class PaymentConfig {
   static const int newsAmount = 101;
   static const int eventsAmount = 101;
   static const int matrimonialYearlyAmount = 2100;
-  static const int familyDirectoryAmount = 101;
+  static const int brideRegistrationAmount = 2100;
+  static const int groomRegistrationAmount = 2100;
+  static const int brideSearchAmount = 2100;
+  static const int groomSearchAmount = 2100;
+  static const int familyDirectoryAmount = 0;
 
   // --- Fee types ---
   static PaymentFeeType feeTypeFor(String featureId) {
@@ -42,8 +50,13 @@ class PaymentConfig {
       case matrimonialYearly:
         return PaymentFeeType.yearly;
       case businessRegistration:
-      case familyDirectory:
+      case brideRegistration:
+      case groomRegistration:
+      case brideSearch:
+      case groomSearch:
         return PaymentFeeType.oneTime;
+      case familyDirectory:
+        return PaymentFeeType.free;
       case advertisement:
       case news:
       case events:
@@ -71,6 +84,14 @@ class PaymentConfig {
         return eventsAmount;
       case matrimonialYearly:
         return matrimonialYearlyAmount;
+      case brideRegistration:
+        return brideRegistrationAmount;
+      case groomRegistration:
+        return groomRegistrationAmount;
+      case brideSearch:
+        return brideSearchAmount;
+      case groomSearch:
+        return groomSearchAmount;
       case familyDirectory:
         return familyDirectoryAmount;
       default:
@@ -121,6 +142,14 @@ class PaymentConfig {
         return 'Events';
       case matrimonialYearly:
         return 'Matrimonial Registration';
+      case brideRegistration:
+        return 'Bride Registration';
+      case groomRegistration:
+        return 'Groom Registration';
+      case brideSearch:
+        return 'Bride Search';
+      case groomSearch:
+        return 'Groom Search';
       case familyDirectory:
         return 'Family Directory';
       default:
@@ -144,6 +173,14 @@ class PaymentConfig {
         return 'कार्यक्रम';
       case matrimonialYearly:
         return 'विवाह नोंदणी';
+      case brideRegistration:
+        return 'वधू नोंदणी';
+      case groomRegistration:
+        return 'वर नोंदणी';
+      case brideSearch:
+        return 'वधू शोध';
+      case groomSearch:
+        return 'वर शोध';
       case familyDirectory:
         return 'कुटुंब निर्देशिका';
       default:
@@ -167,8 +204,16 @@ class PaymentConfig {
         return '₹101 for 24 hours. Social Event free of charges.';
       case matrimonialYearly:
         return 'Yearly fee to register and search groom/bride profiles.';
+      case brideRegistration:
+        return 'One-time fee to register as bride.';
+      case groomRegistration:
+        return 'One-time fee to register as groom.';
+      case brideSearch:
+        return 'One-time fee to search bride profiles.';
+      case groomSearch:
+        return 'One-time fee to search groom profiles.';
       case familyDirectory:
-        return 'One-time payment to access family directory, register and search.';
+        return 'Registration and search are free.';
       default:
         return '';
     }
@@ -188,8 +233,16 @@ class PaymentConfig {
         return '२४ तासांसाठी ₹१०१. सामाजिक कार्यक्रम मोफत.';
       case matrimonialYearly:
         return 'वर/वधू प्रोफाइल नोंदणी आणि शोधण्यासाठी वार्षिक शुल्क.';
+      case brideRegistration:
+        return 'वधू म्हणून नोंदणी करण्यासाठी एकदाचे शुल्क.';
+      case groomRegistration:
+        return 'वर म्हणून नोंदणी करण्यासाठी एकदाचे शुल्क.';
+      case brideSearch:
+        return 'वधू प्रोफाइल शोधण्यासाठी एकदाचे शुल्क.';
+      case groomSearch:
+        return 'वर प्रोफाइल शोधण्यासाठी एकदाचे शुल्क.';
       case familyDirectory:
-        return 'कुटुंब निर्देशिका प्रवेश, नोंदणी आणि शोध एकदाचे पेमेंट.';
+        return 'नोंदणी आणि शोध मोफत आहेत.';
       default:
         return '';
     }
