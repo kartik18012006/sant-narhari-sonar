@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
 import 'email_login_screen.dart';
-import 'main_shell_screen.dart';
 import 'phone_otp_screen.dart';
 
 /// Login / Sign Up — choose Phone or Email (APK-style: white screen, same padding).
@@ -20,15 +19,6 @@ class LoginSignupScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => _onSkip(context),
-            child: const Text(
-              'Skip',
-              style: TextStyle(color: Colors.black87),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -108,12 +98,6 @@ class LoginSignupScreen extends StatelessWidget {
   void _onContinueWithEmail(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const EmailLoginScreen()),
-    );
-  }
-
-  void _onSkip(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
     );
   }
 }

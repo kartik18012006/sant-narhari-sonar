@@ -78,15 +78,6 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
             }
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => _onSkip(context),
-            child: const Text(
-              'Skip',
-              style: TextStyle(color: Colors.black87),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -670,11 +661,5 @@ class _PhoneOtpScreenState extends State<PhoneOtpScreen> {
         );
       }
     }
-  }
-
-  void _onSkip(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
-    );
   }
 }

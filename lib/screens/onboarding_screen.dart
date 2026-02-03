@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
 import 'login_signup_screen.dart';
-import 'main_shell_screen.dart';
 import 'rules_screen.dart';
 
 /// First content screen: onboarding / welcome (APK-style).
@@ -33,18 +32,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              // Top bar: logo (left) and Skip button (right)
+              // Top bar: logo (left)
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _AppIcon(assetPath: 'assets/app logo.png', color: AppTheme.gold),
-                  TextButton(
-                    onPressed: () => _onSkip(context),
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(color: Colors.black87),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -133,12 +125,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onLogin() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
-    );
-  }
-
-  void _onSkip(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainShellScreen()),
     );
   }
 }
