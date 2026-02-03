@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
 import 'login_signup_screen.dart';
+import 'main_shell_screen.dart';
 
 /// Second screen: rules, eligibility, responsibilities, privacy (Marathi).
 /// Shown after onboarding when user taps "Create Your Profile".
@@ -15,13 +16,20 @@ class RulesScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header: app icon (left)
+            // Header: app icon (left) and Skip button (right)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildAppIcon(),
+                  TextButton(
+                    onPressed: () => _onSkip(context),
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -233,6 +241,12 @@ class RulesScreen extends StatelessWidget {
   void _onContinue(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
+    );
+  }
+
+  void _onSkip(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainShellScreen()),
     );
   }
 }

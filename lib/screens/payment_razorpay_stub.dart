@@ -13,13 +13,16 @@ class Razorpay {
 class PaymentSuccessResponse {
   final String? paymentId;
   final String? orderId;
-  PaymentSuccessResponse({this.paymentId, this.orderId});
+  final String? signature;
+  final Map<String, dynamic>? data;
+  PaymentSuccessResponse(this.paymentId, this.orderId, this.signature, this.data);
 }
 
 class PaymentFailureResponse {
+  final int? code;
   final String? message;
-  final String? code;
-  PaymentFailureResponse({this.message, this.code});
+  final Map<String, dynamic>? error;
+  PaymentFailureResponse(this.code, this.message, this.error);
 }
 
 class ExternalWalletResponse {

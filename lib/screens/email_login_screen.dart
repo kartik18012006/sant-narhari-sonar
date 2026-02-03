@@ -39,6 +39,15 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => _onSkip(context),
+            child: const Text(
+              'Skip',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -286,5 +295,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       default:
         return e.message ?? e.code;
     }
+  }
+
+  void _onSkip(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainShellScreen()),
+    );
   }
 }

@@ -33,11 +33,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              // Top bar: logo (left)
+              // Top bar: logo (left) and Skip button (right)
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _AppIcon(assetPath: 'assets/app logo.png', color: AppTheme.gold),
+                  TextButton(
+                    onPressed: () => _onSkip(context),
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -126,6 +133,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onLogin() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LoginSignupScreen()),
+    );
+  }
+
+  void _onSkip(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainShellScreen()),
     );
   }
 }

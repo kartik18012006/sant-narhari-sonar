@@ -464,16 +464,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
           _checkoutOpen = false;
           if (!mounted) return;
           _handlePaymentSuccess(PaymentSuccessResponse(
-            paymentId: response['razorpay_payment_id'] as String?,
-            orderId: response['razorpay_order_id'] as String?,
+            response['razorpay_payment_id'] as String?,
+            response['razorpay_order_id'] as String?,
+            response['razorpay_signature'] as String?,
+            response,
           ));
         },
         onError: (error) {
           _checkoutOpen = false;
           if (!mounted) return;
+          // Convert code to int if it's a string, or use null
+          int? errorCode;
+          final codeValue = error['code'];
+          if (codeValue is int) {
+            errorCode = codeValue;
+          } else if (codeValue is String) {
+            errorCode = int.tryParse(codeValue);
+          }
           _handlePaymentError(PaymentFailureResponse(
-            message: error['message'] as String? ?? 'Payment failed',
-            code: error['code'] as String?,
+            errorCode,
+            error['message'] as String? ?? 'Payment failed',
+            error as Map<String, dynamic>?,
           ));
         },
       );
