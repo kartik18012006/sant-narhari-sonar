@@ -58,7 +58,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final user = FirebaseAuthService.instance.currentUser;
       if (user == null) return;
       // Test email - automatically bypass payment
-      final uid = user!.uid;
+      final uid = user.uid;
       final isSubscription = widget.featureId == PaymentConfig.loginYearly;
       
       // Record payment as success for tracking
