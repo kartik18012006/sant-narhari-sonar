@@ -54,8 +54,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   /// Check if user is test email and bypass payment
   Future<void> _checkTestEmailAndBypass() async {
-    final user = FirebaseAuthService.instance.currentUser;
-    if (user?.email == FirestoreService.testEmail) {
+    if (FirestoreService.isTestEmail()) {
+      final user = FirebaseAuthService.instance.currentUser;
+      if (user == null) return;
       // Test email - automatically bypass payment
       final uid = user!.uid;
       final isSubscription = widget.featureId == PaymentConfig.loginYearly;

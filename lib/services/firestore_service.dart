@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../razorpay_config.dart';
+import 'firebase_auth_service.dart';
 
 /// Razorpay (or other gateway) config fetched from Firestore.
 /// keySecret is optional; when set (test only), app can create orders from client for UPI/Card checkout.
@@ -30,6 +31,21 @@ class FirestoreService {
 
   // Test email that has access to all features without payment
   static const String testEmail = 'razorpaytest@sonarcommunity.com';
+
+  /// Check if current user is test email (checks both Firebase Auth and provided email)
+  static bool isTestEmail([String? email]) {
+    // Check Firebase Auth first
+    final authUser = FirebaseAuthService.instance.currentUser;
+    final authEmail = authUser?.email;
+    if (authEmail == testEmail) {
+      return true;
+    }
+    // Check provided email if given
+    if (email != null && email == testEmail) {
+      return true;
+    }
+    return false;
+  }
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
@@ -98,10 +114,14 @@ class FirestoreService {
   /// Check if user has active subscription (validUntil > now).
   /// Test email bypasses payment check.
   Future<bool> hasActiveSubscription(String uid) async {
-    // Check if user is test email
+    // Check if user is test email (check both Firebase Auth and Firestore)
+    if (isTestEmail()) {
+      return true; // Test email has access to all features
+    }
+    
     final data = await getUserProfile(uid);
     final email = data?['email'] as String?;
-    if (email == testEmail) {
+    if (isTestEmail(email)) {
       return true; // Test email has access to all features
     }
     
@@ -115,7 +135,17 @@ class FirestoreService {
   /// Stream subscription status (for auth gate).
   Stream<bool> subscriptionStatusStream(String uid) {
     return _users.doc(uid).snapshots().map((doc) {
+      // Check if user is test email (check Firebase Auth)
+      if (isTestEmail()) {
+        return true; // Test email has access to all features
+      }
+      
       final data = doc.data();
+      final email = data?['email'] as String?;
+      if (isTestEmail(email)) {
+        return true; // Test email has access to all features
+      }
+      
       final until = data?[subscriptionValidUntilKey];
       if (until == null) return false;
       if (until is Timestamp) return until.toDate().isAfter(DateTime.now());
@@ -592,10 +622,14 @@ class FirestoreService {
   /// Check if user has valid payment for a feature (for 24-hour features, checks validUntil).
   /// Test email bypasses payment check.
   Future<bool> hasValidPaymentForFeature(String userId, String featureId) async {
-    // Check if user is test email
+    // Check if user is test email (check both Firebase Auth and Firestore)
+    if (isTestEmail()) {
+      return true; // Test email has access to all features
+    }
+    
     final data = await getUserProfile(userId);
     final email = data?['email'] as String?;
-    if (email == testEmail) {
+    if (isTestEmail(email)) {
       return true; // Test email has access to all features
     }
     
