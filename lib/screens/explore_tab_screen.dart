@@ -136,7 +136,7 @@ class ExploreTabScreen extends StatelessWidget {
               Expanded(
                 child: _matrimonyButton(
                   icon: Icons.person_search,
-                  label: lang.pick('Search Groom', 'वर शोधक'),
+                  label: lang.pick('Groom Registration', 'वर नोंदणी'),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -150,7 +150,7 @@ class ExploreTabScreen extends StatelessWidget {
               Expanded(
                 child: _matrimonyButton(
                   icon: Icons.person_search,
-                  label: lang.pick('Search Bride', 'वधू शोधक'),
+                  label: lang.pick('Bride Registration', 'वधू नोंदणी'),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -265,7 +265,7 @@ class ExploreTabScreen extends StatelessWidget {
     final items = [
       _FeatureItem('Family Directory', lang.pick('Family Directory', 'कुटुंब निर्देशिका'), lang.pick('Search & Register', 'शोध आणि नोंदणी'), Icons.family_restroom),
       _FeatureItem('Social Workers', lang.pick('Social Workers', 'सामाजिक कार्यकर्ते'), lang.pick('Search & Register', 'शोध आणि नोंदणी'), Icons.volunteer_activism),
-      _FeatureItem('Business', lang.pick('Business', 'व्यवसाय'), lang.pick('List your business in the Sonar community directory', 'सोनार समुदायात व्यवसाय नोंदवा'), Icons.storefront),
+      _FeatureItem('Business', lang.pick('Business Registration', 'व्यवसाय नोंदणी'), lang.pick('List your business in the Sonar community directory', 'सोनार समुदायात व्यवसाय नोंदवा'), Icons.storefront),
       _FeatureItem('Advertisements', lang.pick('Advertisements', 'जाहिराती'), lang.pick('View & List Ads', 'जाहिराती पहा आणि नोंदवा'), Icons.campaign),
       _FeatureItem('News', lang.pick('News', 'बातम्या'), lang.pick('Sonar Community News', 'सोनार समुदाय बातम्या'), Icons.newspaper),
       _FeatureItem('Events', lang.pick('Events', 'कार्यक्रम'), lang.pick('Join & Create', 'सहभागी व्हा आणि तयार करा'), Icons.event),

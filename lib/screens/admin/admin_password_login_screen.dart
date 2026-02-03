@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../app_theme.dart';
+import '../../services/firebase_auth_service.dart';
+import '../../services/firestore_service.dart';
 import 'admin_approvals_dashboard_screen.dart';
 
 /// Password-based admin login (no email required).
@@ -41,13 +43,37 @@ class _AdminPasswordLoginScreenState extends State<AdminPasswordLoginScreen> {
     await Future.delayed(const Duration(milliseconds: 300));
 
     if (password == _adminPassword) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const AdminApprovalsDashboardScreen(),
-        ),
-      );
+      // Get current user and set isAdmin flag in Firestore
+      final user = FirebaseAuthService.instance.currentUser;
+      if (user == null) {
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _error = 'Please sign in first to access admin panel.';
+          });
+        }
+        return;
+      }
+
+      try {
+        // Set isAdmin flag for the current user
+        await FirestoreService.instance.setUserAdmin(user.uid, true);
+        
+        if (!mounted) return;
+        setState(() => _loading = false);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const AdminApprovalsDashboardScreen(),
+          ),
+        );
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _error = 'Failed to grant admin access: ${e.toString()}';
+          });
+        }
+      }
     } else {
       if (mounted) {
         setState(() {

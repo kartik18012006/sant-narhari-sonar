@@ -231,10 +231,16 @@ class _NewsSearchScreenState extends State<NewsSearchScreen> {
   }
 
   void _onSearch() {
-    // Navigate to news list (filters can be applied later in ViewAllNewsScreen)
+    // Navigate to news list with location filters
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => const ViewAllNewsScreen(),
+        builder: (_) => ViewAllNewsScreen(
+          country: _country,
+          state: _state,
+          district: _district,
+          taluka: _taluka,
+          village: _village,
+        ),
       ),
     );
   }
