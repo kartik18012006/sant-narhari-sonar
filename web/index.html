@@ -40,6 +40,22 @@
   <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-storage-compat.js"></script>
+  
+  <!-- Unregister old service workers to prevent caching issues -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
