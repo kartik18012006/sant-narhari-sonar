@@ -583,7 +583,7 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade700,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                       ),
@@ -594,7 +594,13 @@ class _RegisterSocialWorkerScreenState extends State<RegisterSocialWorkerScreen>
                             width: 24,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
-                        : const Text('Preview Form / फॉर्मचे पूर्वावलोकन', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        : const Text(
+                            'Preview Form / फॉर्मचे पूर्वावलोकन',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                   ),
                 ),
               ],
