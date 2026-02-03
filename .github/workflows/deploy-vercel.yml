@@ -16,16 +16,23 @@ jobs:
         with:
           flutter-version: "3.24.0"
           channel: "stable"
-          cache: true
+          cache: false
 
       - name: Clean build
         run: flutter clean
+
+      - name: Remove build cache
+        run: |
+          rm -rf build/
+          rm -rf .dart_tool/
+          rm -rf .flutter-plugins
+          rm -rf .flutter-plugins-dependencies
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release --no-tree-shake-icons
+        run: flutter build web --release --no-tree-shake-icons --no-sound-null-safety
 
       - name: Prepare Vercel Build Output (v3)
         run: |
