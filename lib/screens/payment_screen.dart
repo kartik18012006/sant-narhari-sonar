@@ -45,10 +45,54 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
+    _checkTestEmailAndBypass();
     _loadGatewayConfig();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, (dynamic r) => _handlePaymentSuccess(r as PaymentSuccessResponse));
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, (dynamic r) => _handlePaymentError(r as PaymentFailureResponse));
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, (dynamic r) => _handleExternalWallet(r as ExternalWalletResponse));
+  }
+
+  /// Check if user is test email and bypass payment
+  Future<void> _checkTestEmailAndBypass() async {
+    final user = FirebaseAuthService.instance.currentUser;
+    if (user?.email == FirestoreService.testEmail) {
+      // Test email - automatically bypass payment
+      final uid = user!.uid;
+      final isSubscription = widget.featureId == PaymentConfig.loginYearly;
+      
+      // Record payment as success for tracking
+      await FirestoreService.instance.recordPayment(
+        userId: uid,
+        featureId: widget.featureId,
+        amountInr: _amount,
+        status: 'success',
+        transactionId: 'test_email_bypass',
+      );
+      
+      if (isSubscription) {
+        final validUntil = DateTime.now().add(const Duration(days: 365));
+        await FirestoreService.instance.setSubscriptionValidUntil(uid, validUntil);
+      }
+      
+      // Wait for next frame to ensure context is available
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isSubscription
+                      ? 'Test account: Subscription active. You now have full app access.'
+                      : 'Test account: Payment bypassed. Feature access granted.',
+                ),
+                backgroundColor: Colors.green.shade700,
+              ),
+            );
+            Navigator.of(context).pop(true);
+          }
+        });
+      }
+    }
   }
 
   @override

@@ -28,6 +28,9 @@ class FirestoreService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Test email that has access to all features without payment
+  static const String testEmail = 'razorpaytest@sonarcommunity.com';
+
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
 
@@ -93,8 +96,15 @@ class FirestoreService {
   }
 
   /// Check if user has active subscription (validUntil > now).
+  /// Test email bypasses payment check.
   Future<bool> hasActiveSubscription(String uid) async {
+    // Check if user is test email
     final data = await getUserProfile(uid);
+    final email = data?['email'] as String?;
+    if (email == testEmail) {
+      return true; // Test email has access to all features
+    }
+    
     final until = data?[subscriptionValidUntilKey];
     if (until == null) return false;
     if (until is Timestamp) return until.toDate().isAfter(DateTime.now());
@@ -580,9 +590,16 @@ class FirestoreService {
   }
 
   /// Check if user has valid payment for a feature (for 24-hour features, checks validUntil).
+  /// Test email bypasses payment check.
   Future<bool> hasValidPaymentForFeature(String userId, String featureId) async {
+    // Check if user is test email
+    final data = await getUserProfile(userId);
+    final email = data?['email'] as String?;
+    if (email == testEmail) {
+      return true; // Test email has access to all features
+    }
+    
     if (featureId == 'events' || featureId == 'advertisement' || featureId == 'news') {
-      final data = await getUserProfile(userId);
       final validUntil = data?['${featureId}_validUntil'];
       if (validUntil == null) return false;
       if (validUntil is Timestamp) return validUntil.toDate().isAfter(DateTime.now());
