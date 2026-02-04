@@ -203,13 +203,25 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
   }
 
   Future<String?> _uploadPhoto(String fieldName) async {
-    return await ImagePickerService.instance.pickAndUploadImage(
-      context: context,
-      storagePath: 'advertisements/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}/$fieldName',
-      maxWidth: 1024,
-      maxHeight: 1024,
-      successMessage: 'Photo uploaded successfully.',
-    );
+    try {
+      return await ImagePickerService.instance.pickAndUploadImage(
+        context: context,
+        storagePath: 'advertisements/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}/$fieldName',
+        maxWidth: 1024,
+        maxHeight: 1024,
+        successMessage: 'Photo uploaded successfully.',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload photo: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    }
   }
 
   Future<void> _onSubmit() async {
@@ -339,11 +351,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingOwnerPhoto,
                     onTap: () async {
                       setState(() => _uploadingOwnerPhoto = true);
-                      final url = await _uploadPhoto('owner_photo');
-                      setState(() {
-                        _uploadingOwnerPhoto = false;
-                        if (url != null) _ownerPhotoUrl = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('owner_photo');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingOwnerPhoto = false;
+                          if (url != null) _ownerPhotoUrl = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingOwnerPhoto = false);
+                        }
+                      }
                     },
                     icon: Icons.person,
                   ),
@@ -356,11 +375,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingBusinessLogo,
                     onTap: () async {
                       setState(() => _uploadingBusinessLogo = true);
-                      final url = await _uploadPhoto('business_logo');
-                      setState(() {
-                        _uploadingBusinessLogo = false;
-                        if (url != null) _businessLogoUrl = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('business_logo');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingBusinessLogo = false;
+                          if (url != null) _businessLogoUrl = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingBusinessLogo = false);
+                        }
+                      }
                     },
                     icon: Icons.business,
                   ),
@@ -381,11 +407,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingOutdoorPhoto,
                     onTap: () async {
                       setState(() => _uploadingOutdoorPhoto = true);
-                      final url = await _uploadPhoto('outdoor_photo');
-                      setState(() {
-                        _uploadingOutdoorPhoto = false;
-                        if (url != null) _outdoorPhotoUrl = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('outdoor_photo');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingOutdoorPhoto = false;
+                          if (url != null) _outdoorPhotoUrl = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingOutdoorPhoto = false);
+                        }
+                      }
                     },
                   ),
                 ),
@@ -397,11 +430,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingInteriorPhoto1,
                     onTap: () async {
                       setState(() => _uploadingInteriorPhoto1 = true);
-                      final url = await _uploadPhoto('interior_photo_1');
-                      setState(() {
-                        _uploadingInteriorPhoto1 = false;
-                        if (url != null) _interiorPhoto1Url = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('interior_photo_1');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingInteriorPhoto1 = false;
+                          if (url != null) _interiorPhoto1Url = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingInteriorPhoto1 = false);
+                        }
+                      }
                     },
                   ),
                 ),
@@ -417,11 +457,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingInteriorPhoto2,
                     onTap: () async {
                       setState(() => _uploadingInteriorPhoto2 = true);
-                      final url = await _uploadPhoto('interior_photo_2');
-                      setState(() {
-                        _uploadingInteriorPhoto2 = false;
-                        if (url != null) _interiorPhoto2Url = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('interior_photo_2');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingInteriorPhoto2 = false;
+                          if (url != null) _interiorPhoto2Url = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingInteriorPhoto2 = false);
+                        }
+                      }
                     },
                   ),
                 ),
@@ -433,11 +480,18 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
                     uploading: _uploadingInteriorPhoto3,
                     onTap: () async {
                       setState(() => _uploadingInteriorPhoto3 = true);
-                      final url = await _uploadPhoto('interior_photo_3');
-                      setState(() {
-                        _uploadingInteriorPhoto3 = false;
-                        if (url != null) _interiorPhoto3Url = url;
-                      });
+                      try {
+                        final url = await _uploadPhoto('interior_photo_3');
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingInteriorPhoto3 = false;
+                          if (url != null) _interiorPhoto3Url = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingInteriorPhoto3 = false);
+                        }
+                      }
                     },
                   ),
                 ),
@@ -1560,27 +1614,6 @@ class _CreateAdScreenState extends State<CreateAdScreen> {
     );
   }
 
-  Widget _buildCheckbox({
-    required String label,
-    required bool value,
-    required ValueChanged<bool?> onChanged,
-  }) {
-    return Row(
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: onChanged,
-          activeColor: AppTheme.gold,
-        ),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _circularPhotoPlaceholder() {
     return Column(

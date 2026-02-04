@@ -139,18 +139,30 @@ class _FamilyDirectoryRegistrationScreenState extends State<FamilyDirectoryRegis
 
   Future<void> _pickPhoto() async {
     setState(() => _uploadingPhoto = true);
-    final url = await ImagePickerService.instance.pickAndUploadImage(
-      context: context,
-      storagePath: 'family_directory/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}',
-      maxWidth: 1024,
-      maxHeight: 1024,
-      successMessage: 'Photo uploaded successfully.',
-    );
-    if (!mounted) return;
-    setState(() {
-      _uploadingPhoto = false;
-      if (url != null) _photoUrl = url;
-    });
+    try {
+      final url = await ImagePickerService.instance.pickAndUploadImage(
+        context: context,
+        storagePath: 'family_directory/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}',
+        maxWidth: 1024,
+        maxHeight: 1024,
+        successMessage: 'Photo uploaded successfully.',
+      );
+      if (!mounted) return;
+      setState(() {
+        _uploadingPhoto = false;
+        if (url != null) _photoUrl = url;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _uploadingPhoto = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload photo: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _addFamilyMember() {

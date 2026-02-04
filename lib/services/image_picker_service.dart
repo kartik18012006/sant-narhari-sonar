@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 
 import 'firebase_auth_service.dart';
@@ -13,7 +14,13 @@ class ImagePickerService {
 
   /// Show modal bottom sheet to select image source (Gallery or Camera).
   /// Returns the selected ImageSource or null if cancelled.
+  /// On web, only shows Gallery option (Camera not supported).
   Future<ImageSource?> showImageSourcePicker(BuildContext context) async {
+    // On web, directly return gallery source (file picker)
+    if (kIsWeb) {
+      return ImageSource.gallery;
+    }
+    
     return await showModalBottomSheet<ImageSource>(
       context: context,
       isDismissible: true,
@@ -94,12 +101,25 @@ class ImagePickerService {
         maxWidth: maxWidth.toDouble(),
         maxHeight: maxHeight.toDouble(),
         imageQuality: imageQuality,
+        requestFullMetadata: false, // Improve web compatibility
       );
 
       if (xFile == null || !context.mounted) return null;
 
-      // Read bytes
+      // Read bytes - on web, this is the only reliable way
       final bytes = await xFile.readAsBytes();
+      
+      if (bytes.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to read image. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return null;
+      }
       
       // Check file size
       if (bytes.length > FirebaseStorageService.maxBytes) {
@@ -145,18 +165,31 @@ class ImagePickerService {
     } catch (e) {
       if (context.mounted) {
         String errorMsg = 'Failed to upload image.';
-        if (e.toString().contains('permission')) {
-          errorMsg = 'Permission denied. Please grant camera/gallery access in settings.';
-        } else if (e.toString().contains('camera')) {
-          errorMsg = 'Camera not available. Please try gallery instead.';
+        final errorString = e.toString().toLowerCase();
+        
+        if (errorString.contains('permission') || errorString.contains('access')) {
+          errorMsg = kIsWeb 
+              ? 'Please allow file access in your browser settings.'
+              : 'Permission denied. Please grant camera/gallery access in settings.';
+        } else if (errorString.contains('camera')) {
+          errorMsg = kIsWeb
+              ? 'Camera not supported on web. Please use Gallery option.'
+              : 'Camera not available. Please try gallery instead.';
+        } else if (errorString.contains('missingplugin') || errorString.contains('platform')) {
+          errorMsg = kIsWeb
+              ? 'File picker not available. Please use a modern browser (Chrome, Firefox, Edge).'
+              : 'Image picker not available. Please update the app.';
         } else {
           errorMsg = 'Error: ${e.toString()}';
+          // Log full error for debugging
+          debugPrint('ImagePickerService error: $e');
         }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
       }

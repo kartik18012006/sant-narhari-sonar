@@ -96,14 +96,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<String?> _uploadBanner() async {
-    return await ImagePickerService.instance.pickAndUploadImage(
-      context: context,
-      storagePath: 'events/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}/banner',
-      maxWidth: 1920,
-      maxHeight: 1080,
-      successMessage: 'Banner uploaded successfully.',
-      errorMessage: 'Upload failed. Please try again.',
-    );
+    try {
+      return await ImagePickerService.instance.pickAndUploadImage(
+        context: context,
+        storagePath: 'events/${FirebaseAuthService.instance.currentUser?.uid ?? 'unknown'}/banner',
+        maxWidth: 1920,
+        maxHeight: 1080,
+        successMessage: 'Banner uploaded successfully.',
+        errorMessage: 'Upload failed. Please try again.',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to upload banner: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    }
   }
 
   Future<bool> _checkEventPaymentValidity() async {
@@ -266,11 +278,24 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ? null
                   : () async {
                       setState(() => _uploadingBanner = true);
-                      final url = await _uploadBanner();
-                      setState(() {
-                        _uploadingBanner = false;
-                        if (url != null) _bannerUrl = url;
-                      });
+                      try {
+                        final url = await _uploadBanner();
+                        if (!mounted) return;
+                        setState(() {
+                          _uploadingBanner = false;
+                          if (url != null) _bannerUrl = url;
+                        });
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => _uploadingBanner = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to upload banner: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
                     },
               child: Container(
                 height: 200,
